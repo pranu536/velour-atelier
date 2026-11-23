@@ -4,16 +4,17 @@
 
 @layer base {
   :root {
-    --background: 250 248 245;
-    --foreground: 18 14 11;
+    --background: 248 246 241;
+    --foreground: 36 36 36;
   }
 
   body {
-    color: rgb(18, 14, 11);
-    background: #FAF8F5;
+    color: #242424;
+    background: #F8F6F1;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 
   /* Custom subtle scrollbar */
@@ -22,14 +23,14 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #F5F0EB;
+    background: #F1EDE5;
   }
   ::-webkit-scrollbar-thumb {
-    background: #BCA38A;
+    background: #D8CDBD;
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #9E8268;
+    background: #C2B4A0;
   }
 }
 

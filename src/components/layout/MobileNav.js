@@ -18,15 +18,15 @@ export default function MobileNav({ isOpen, onClose, links, session }) {
       />
 
       {/* Drawer */}
-      <div className="fixed inset-y-0 left-0 w-4/5 max-w-sm bg-white shadow-2xl flex flex-col z-10 animate-fade-in">
+      <div className="fixed inset-y-0 left-0 w-4/5 max-w-sm bg-[#F8F6F1] shadow-2xl flex flex-col z-10 animate-fade-in border-r border-[#EBE6DD]">
         {/* Header */}
-        <div className="p-5 border-b border-neutral-100 flex items-center justify-between">
-          <span className="font-serif text-xl tracking-widest uppercase font-bold text-noir-900">
+        <div className="p-5 border-b border-[#EBE6DD] flex items-center justify-between bg-white">
+          <span className="font-serif text-xl tracking-[0.2em] uppercase text-[#242424]">
             {APP_CONFIG.name}
           </span>
           <button
             onClick={onClose}
-            className="p-1 text-neutral-400 hover:text-noir-900"
+            className="p-1 text-neutral-400 hover:text-[#242424]"
             aria-label="Close menu"
           >
             <X className="w-5 h-5" />
@@ -35,37 +35,88 @@ export default function MobileNav({ isOpen, onClose, links, session }) {
 
         {/* Links */}
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-          {/* Departments */}
+          {/* Main Navigation Links */}
           <div className="space-y-3">
-            <h4 className="text-[10px] uppercase tracking-widest text-brand-600 font-bold">
-              Shop By Audience
+            <h4 className="text-[10px] uppercase tracking-widest text-[#7F6650] font-semibold">
+              Navigation
             </h4>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
               <Link
-                href="/shop?gender=Women"
+                href="/"
                 onClick={onClose}
-                className="p-3 bg-neutral-50 hover:bg-brand-50 border border-neutral-200 rounded text-center text-xs uppercase tracking-wider font-semibold text-noir-900"
+                className="block text-sm uppercase tracking-wider text-[#242424] font-medium hover:text-[#7F6650]"
               >
-                Women
+                Home
               </Link>
               <Link
                 href="/shop?gender=Men"
                 onClick={onClose}
-                className="p-3 bg-neutral-50 hover:bg-brand-50 border border-neutral-200 rounded text-center text-xs uppercase tracking-wider font-semibold text-noir-900"
+                className="block text-sm uppercase tracking-wider text-[#242424] font-medium hover:text-[#7F6650]"
               >
                 Men
               </Link>
               <Link
+                href="/shop?gender=Women"
+                onClick={onClose}
+                className="block text-sm uppercase tracking-wider text-[#242424] font-medium hover:text-[#7F6650]"
+              >
+                Women
+              </Link>
+              <Link
                 href="/shop?gender=Kids"
                 onClick={onClose}
-                className="p-3 bg-neutral-50 hover:bg-brand-50 border border-neutral-200 rounded text-center text-xs uppercase tracking-wider font-semibold text-noir-900"
+                className="block text-sm uppercase tracking-wider text-[#242424] font-medium hover:text-[#7F6650]"
               >
                 Kids
               </Link>
               <Link
                 href="/shop?gender=Unisex"
                 onClick={onClose}
-                className="p-3 bg-neutral-50 hover:bg-brand-50 border border-neutral-200 rounded text-center text-xs uppercase tracking-wider font-semibold text-noir-900"
+                className="block text-sm uppercase tracking-wider text-[#242424] font-medium hover:text-[#7F6650]"
+              >
+                Unisex
+              </Link>
+              <Link
+                href="/shop"
+                onClick={onClose}
+                className="block text-sm uppercase tracking-wider text-[#242424] font-medium hover:text-[#7F6650]"
+              >
+                Collections
+              </Link>
+            </div>
+          </div>
+
+          {/* Quick Audience 2x2 Grid */}
+          <div className="space-y-3 pt-2">
+            <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">
+              Shop By Line
+            </h4>
+            <div className="grid grid-cols-2 gap-2">
+              <Link
+                href="/shop?gender=Women"
+                onClick={onClose}
+                className="p-3 bg-white hover:bg-[#F1EDE5] border border-[#EBE6DD] text-center text-xs uppercase tracking-wider font-medium text-[#242424]"
+              >
+                Women
+              </Link>
+              <Link
+                href="/shop?gender=Men"
+                onClick={onClose}
+                className="p-3 bg-white hover:bg-[#F1EDE5] border border-[#EBE6DD] text-center text-xs uppercase tracking-wider font-medium text-[#242424]"
+              >
+                Men
+              </Link>
+              <Link
+                href="/shop?gender=Kids"
+                onClick={onClose}
+                className="p-3 bg-white hover:bg-[#F1EDE5] border border-[#EBE6DD] text-center text-xs uppercase tracking-wider font-medium text-[#242424]"
+              >
+                Kids
+              </Link>
+              <Link
+                href="/shop?gender=Unisex"
+                onClick={onClose}
+                className="p-3 bg-white hover:bg-[#F1EDE5] border border-[#EBE6DD] text-center text-xs uppercase tracking-wider font-medium text-[#242424]"
               >
                 Unisex
               </Link>

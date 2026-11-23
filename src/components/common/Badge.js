@@ -6,17 +6,18 @@ export default function Badge({
   size = "md",
   className = "",
 }) {
-  const baseStyles = "inline-flex items-center font-medium uppercase tracking-wider rounded-full";
+  const baseStyles = "inline-flex items-center font-medium uppercase tracking-wider rounded-none text-[10px]";
 
   const variants = {
-    default: "bg-noir-100 text-noir-800 border border-noir-200",
-    new: "bg-noir-900 text-white",
-    sale: "bg-rose-600 text-white",
-    gold: "bg-brand-100 text-brand-800 border border-brand-300",
-    success: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-    warning: "bg-amber-50 text-amber-700 border border-amber-200",
-    danger: "bg-rose-50 text-rose-700 border border-rose-200",
-    outline: "border border-neutral-300 text-neutral-700 bg-transparent",
+    default: "bg-[#F1EDE5] text-[#242424] border border-[#D8CDBD]",
+    new: "bg-[#F8F6F1] text-[#242424] border border-[#D8CDBD] tracking-widest",
+    bestseller: "bg-[#242424] text-white border border-[#242424] tracking-widest",
+    sale: "bg-[#242424] text-white",
+    gold: "bg-[#FAF8F5] text-[#7F6650] border border-[#D5C4B0]",
+    success: "bg-emerald-50 text-emerald-800 border border-emerald-200",
+    warning: "bg-amber-50 text-amber-800 border border-amber-200",
+    danger: "bg-neutral-200 text-neutral-800 border border-neutral-300",
+    outline: "border border-[#D8CDBD] text-[#242424] bg-white",
   };
 
   const sizes = {
