@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { CheckCircle2, Package, ArrowRight, Printer, Sparkles } from "lucide-react";
 import Button from "@/components/common/Button";
 
-export default function OrderSuccessPage({ params }) {
-  const { id } = params;
+export default function OrderSuccessPage({ params: propParams }) {
+  const routeParams = useParams();
+  const id =
+    routeParams?.id ||
+    (propParams && typeof propParams.then !== "function" ? propParams.id : "VEL-ORDER");
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-16 sm:py-24 text-center space-y-8 animate-fade-in">
