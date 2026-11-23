@@ -78,7 +78,7 @@ export default function AdminProductsPage() {
       inStock: true,
       description: productForm.description || "Fine crafted atelier garment.",
       details: ["100% Sustainable Cotton Blend", "Tailored fit", "Dry clean only"],
-      sizes: ["S", "M", "L", "XL"],
+      sizes: productForm.gender === "Kids" ? ["3-4Y", "5-6Y", "7-8Y", "9-10Y", "11-12Y"] : ["XS", "S", "M", "L", "XL"],
       colors: [{ name: "Onyx Black", hexCode: "#111111" }],
       images: [
         productForm.image ||
@@ -290,6 +290,7 @@ export default function AdminProductsPage() {
               >
                 <option value="Men">Men</option>
                 <option value="Women">Women</option>
+                <option value="Kids">Kids</option>
                 <option value="Unisex">Unisex</option>
               </select>
             </div>

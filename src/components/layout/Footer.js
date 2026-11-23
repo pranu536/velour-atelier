@@ -39,14 +39,14 @@ export default function Footer() {
       </div>
 
       {/* Main Footer Links */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
         {/* Brand Column */}
         <div className="lg:col-span-2 space-y-4">
           <Link href="/" className="inline-block text-2xl font-serif tracking-widest text-white">
             {APP_CONFIG.name}
           </Link>
           <p className="text-xs text-neutral-400 max-w-sm leading-relaxed">
-            {APP_CONFIG.tagline}. Architectural silhouettes, tailored cuts, and organic textiles crafted for timeless personal style.
+            {APP_CONFIG.tagline}. Architectural silhouettes, tailored cuts, and organic textiles crafted for timeless personal style across Men, Women, Kids, and Unisex lines.
           </p>
           {/* Newsletter Box */}
           <div className="pt-2">
@@ -63,6 +63,19 @@ export default function Footer() {
             </div>
             <p className="text-[10px] text-neutral-500 mt-1.5">Receive private previews, lookbooks, and invitations.</p>
           </div>
+        </div>
+
+        {/* Departments */}
+        <div>
+          <h4 className="text-xs font-semibold uppercase tracking-widest text-white mb-4">Departments</h4>
+          <ul className="space-y-2.5 text-xs text-neutral-400">
+            <li><Link href="/shop?gender=Women" className="hover:text-white transition-colors">Women's Atelier</Link></li>
+            <li><Link href="/shop?gender=Men" className="hover:text-white transition-colors">Men's Atelier</Link></li>
+            <li><Link href="/shop?gender=Kids" className="hover:text-white transition-colors">Kids Atelier</Link></li>
+            <li><Link href="/shop?gender=Unisex" className="hover:text-white transition-colors">Unisex Archetypes</Link></li>
+            <li><Link href="/shop?filter=new" className="hover:text-white transition-colors">New Arrivals</Link></li>
+            <li><Link href="/shop?sort=trending" className="hover:text-white transition-colors">Trending Pieces</Link></li>
+          </ul>
         </div>
 
         {/* Collections */}

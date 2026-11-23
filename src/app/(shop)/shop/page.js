@@ -2,9 +2,23 @@
 
 import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Filter, SlidersHorizontal, ArrowUpDown, X, Sparkles, Loader2 } from "lucide-react";
+import {
+  SlidersHorizontal,
+  X,
+  Sparkles,
+  Loader2,
+  Check,
+  CheckCircle2,
+} from "lucide-react";
 import { INITIAL_CATEGORIES, INITIAL_PRODUCTS } from "@/lib/seed-data";
-import { GENDERS, SORT_OPTIONS } from "@/lib/constants";
+import {
+  GENDERS,
+  ADULT_SIZES,
+  KIDS_SIZES,
+  ALL_SIZES,
+  FILTER_COLORS,
+  SORT_OPTIONS,
+} from "@/lib/constants";
 import ProductGrid from "@/components/product/ProductGrid";
 import Button from "@/components/common/Button";
 
@@ -12,97 +26,189 @@ function ShopContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // URL Query state
+  // URL state
   const activeCategory = searchParams.get("category") || "all";
   const activeGender = searchParams.get("gender") || "all";
   const searchQuery = searchParams.get("search") || "";
   const activeSort = searchParams.get("sort") || "newest";
+  const activeSize = searchParams.get("size") || "all";
+  const activeColor = searchParams.get("color") || "all";
 
   // Filter UI states
   const [selectedCategory, setSelectedCategory] = useState(activeCategory);
   const [selectedGender, setSelectedGender] = useState(activeGender);
   const [selectedSort, setSelectedSort] = useState(activeSort);
+  const [selectedSize, setSelectedSize] = useState(activeSize);
+  const [selectedColor, setSelectedColor] = useState(activeColor);
   const [priceMax, setPriceMax] = useState(15000);
+  const [inStockOnly, setInStockOnly] = useState(false);
   const [isFilterOpenMobile, setIsFilterOpenMobile] = useState(false);
 
-  // Sync state with URL params
+  // Sync state when URL search params change
   useEffect(() => {
     setSelectedCategory(searchParams.get("category") || "all");
     setSelectedGender(searchParams.get("gender") || "all");
     setSelectedSort(searchParams.get("sort") || "newest");
+    setSelectedSize(searchParams.get("size") || "all");
+    setSelectedColor(searchParams.get("color") || "all");
   }, [searchParams]);
 
-  const updateFilters = (newCategory, newGender, newSort) => {
+  // Sync filters to URL query
+  const updateFilters = (newParams) => {
     const params = new URLSearchParams();
-    if (newCategory && newCategory !== "all") params.set("category", newCategory);
-    if (newGender && newGender !== "all") params.set("gender", newGender);
-    if (newSort && newSort !== "newest") params.set("sort", newSort);
+    const cat = newParams.category !== undefined ? newParams.category : selectedCategory;
+    const gen = newParams.gender !== undefined ? newParams.gender : selectedGender;
+    const srt = newParams.sort !== undefined ? newParams.sort : selectedSort;
+    const sz = newParams.size !== undefined ? newParams.size : selectedSize;
+    const col = newParams.color !== undefined ? newParams.color : selectedColor;
+
+    if (cat && cat !== "all") params.set("category", cat);
+    if (gen && gen !== "all") params.set("gender", gen);
+    if (srt && srt !== "newest") params.set("sort", srt);
+    if (sz && sz !== "all") params.set("size", sz);
+    if (col && col !== "all") params.set("color", col);
     if (searchQuery) params.set("search", searchQuery);
 
     router.push(`/shop?${params.toString()}`);
   };
 
-  const handleCategoryChange = (slug) => {
-    setSelectedCategory(slug);
-    updateFilters(slug, selectedGender, selectedSort);
+  const handleGenderChange = (val) => {
+    setSelectedGender(val);
+    // If switching to/from Kids, clear size to prevent incompatible size selections
+    const newSize = val === "Kids" && !KIDS_SIZES.includes(selectedSize) ? "all" : selectedSize;
+    setSelectedSize(newSize);
+    updateFilters({ gender: val, size: newSize });
   };
 
-  const handleGenderChange = (gender) => {
-    setSelectedGender(gender);
-    updateFilters(selectedCategory, gender, selectedSort);
+  const handleCategoryChange = (slug) => {
+    setSelectedCategory(slug);
+    updateFilters({ category: slug });
+  };
+
+  const handleSizeChange = (size) => {
+    const next = selectedSize === size ? "all" : size;
+    setSelectedSize(next);
+    updateFilters({ size: next });
+  };
+
+  const handleColorChange = (colorName) => {
+    const next = selectedColor === colorName ? "all" : colorName;
+    setSelectedColor(next);
+    updateFilters({ color: next });
   };
 
   const handleSortChange = (sort) => {
     setSelectedSort(sort);
-    updateFilters(selectedCategory, selectedGender, sort);
+    updateFilters({ sort });
   };
 
   const clearAllFilters = () => {
     setSelectedCategory("all");
     setSelectedGender("all");
     setSelectedSort("newest");
+    setSelectedSize("all");
+    setSelectedColor("all");
     setPriceMax(15000);
+    setInStockOnly(false);
     router.push("/shop");
   };
 
-  // Filtered & sorted product list
+  // Determine which sizes to show in the filter
+  const availableSizes = useMemo(() => {
+    if (selectedGender === "Kids") return KIDS_SIZES;
+    if (selectedGender === "Women" || selectedGender === "Men" || selectedGender === "Unisex") {
+      return ADULT_SIZES;
+    }
+    return ALL_SIZES;
+  }, [selectedGender]);
+
+  // Multi-attribute Filtered & Sorted Product List
   const filteredProducts = useMemo(() => {
     return INITIAL_PRODUCTS.filter((product) => {
-      // Category filter
+      // 1. Gender / Audience filter
+      if (selectedGender !== "all") {
+        if (selectedGender === "Kids" && product.gender !== "Kids") return false;
+        if (selectedGender === "Men" && product.gender !== "Men" && product.gender !== "Unisex") return false;
+        if (selectedGender === "Women" && product.gender !== "Women" && product.gender !== "Unisex") return false;
+        if (selectedGender === "Unisex" && product.gender !== "Unisex") return false;
+      }
+
+      // 2. Category filter
       if (selectedCategory !== "all" && product.categorySlug !== selectedCategory) {
         return false;
       }
-      // Gender filter
-      if (selectedGender !== "all" && product.gender !== selectedGender && product.gender !== "Unisex") {
+
+      // 3. Size filter
+      if (selectedSize !== "all" && (!product.sizes || !product.sizes.includes(selectedSize))) {
         return false;
       }
-      // Price filter
+
+      // 4. Color filter
+      if (selectedColor !== "all") {
+        const hasColor = product.colors?.some((c) =>
+          c.name.toLowerCase().includes(selectedColor.toLowerCase())
+        );
+        if (!hasColor) return false;
+      }
+
+      // 5. Price filter
       if (product.price > priceMax) {
         return false;
       }
-      // Search filter
+
+      // 6. In-Stock Availability filter
+      if (inStockOnly && (!product.inStock || product.stockCount <= 0)) {
+        return false;
+      }
+
+      // 7. Search query filter
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const matchesName = product.name.toLowerCase().includes(q);
         const matchesDesc = product.description.toLowerCase().includes(q);
+        const matchesGender = product.gender.toLowerCase().includes(q);
         const matchesTag = product.tags?.some((t) => t.toLowerCase().includes(q));
-        if (!matchesName && !matchesDesc && !matchesTag) return false;
+        if (!matchesName && !matchesDesc && !matchesTag && !matchesGender) return false;
       }
+
       return true;
     }).sort((a, b) => {
       if (selectedSort === "price_asc") return a.price - b.price;
       if (selectedSort === "price_desc") return b.price - a.price;
       if (selectedSort === "rating") return b.rating - a.rating;
+      if (selectedSort === "trending") {
+        return (b.isTrending ? 1 : 0) - (a.isTrending ? 1 : 0) || b.rating - a.rating;
+      }
       return 0; // default newest
     });
-  }, [selectedCategory, selectedGender, selectedSort, priceMax, searchQuery]);
+  }, [
+    selectedCategory,
+    selectedGender,
+    selectedSort,
+    selectedSize,
+    selectedColor,
+    priceMax,
+    inStockOnly,
+    searchQuery,
+  ]);
+
+  const hasActiveFilters =
+    selectedCategory !== "all" ||
+    selectedGender !== "all" ||
+    selectedSize !== "all" ||
+    selectedColor !== "all" ||
+    priceMax < 15000 ||
+    inStockOnly ||
+    searchQuery;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Header & Breadcrumb */}
+      {/* Top Header & Breadcrumb */}
       <div className="pb-8 border-b border-neutral-200">
         <div className="flex items-center space-x-2 text-xs uppercase tracking-widest text-neutral-400">
-          <span>Maison</span>
+          <button onClick={() => router.push("/")} className="hover:text-noir-900 transition-colors">
+            Maison
+          </button>
           <span>/</span>
           <span className="text-noir-900 font-semibold">Atelier Wardrobe</span>
           {searchQuery && (
@@ -126,26 +232,28 @@ function ShopContent() {
           )}
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between mt-3">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mt-3 gap-4">
           <div>
             <h1 className="font-serif text-3xl sm:text-4xl font-bold uppercase tracking-tight text-noir-900">
-              The Wardrobe Catalog
+              {selectedGender === "all"
+                ? "The Complete Wardrobe"
+                : `${selectedGender}'s Atelier Collection`}
             </h1>
             <p className="text-xs text-neutral-500 mt-1 max-w-xl">
-              Engineered garments, architectural silhouettes, and organic textiles.
+              Architectural silhouettes and sustainable fabrics across Men, Women, Kids, and Unisex collections.
               Displaying {filteredProducts.length} pieces.
             </p>
           </div>
 
-          {/* Quick Active Gender Filter Pills */}
-          <div className="flex items-center space-x-2 mt-4 md:mt-0 overflow-x-auto pb-2 md:pb-0">
+          {/* Quick Audience / Gender Filter Tabs */}
+          <div className="flex items-center space-x-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
             {GENDERS.map((g) => (
               <button
                 key={g.value}
                 onClick={() => handleGenderChange(g.value)}
-                className={`px-3 py-1.5 text-xs uppercase tracking-wider rounded-sm transition-colors border ${
+                className={`px-3.5 py-1.5 text-xs uppercase tracking-wider rounded-sm transition-colors border font-medium whitespace-nowrap ${
                   selectedGender === g.value
-                    ? "bg-noir-900 text-white border-noir-900 font-medium"
+                    ? "bg-noir-900 text-white border-noir-900 shadow-sm"
                     : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400"
                 }`}
               >
@@ -156,29 +264,26 @@ function ShopContent() {
         </div>
       </div>
 
-      {/* Main Content Area: Sidebar + Grid */}
+      {/* Main Grid: Sidebar Filters + Products */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-8">
-        {/* Desktop Sidebar Filters */}
-        <aside className="hidden lg:block space-y-8 pr-4 border-r border-neutral-200">
-          {/* Active Filter Clear */}
-          {(selectedCategory !== "all" ||
-            selectedGender !== "all" ||
-            searchQuery ||
-            priceMax < 15000) && (
+        {/* Desktop Filter Sidebar */}
+        <aside className="hidden lg:block space-y-7 pr-6 border-r border-neutral-200">
+          {/* Active Filter Clear Header */}
+          {hasActiveFilters && (
             <div className="pb-4 border-b border-neutral-200 flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-noir-900">
-                Filters Applied
+                Active Filters
               </span>
               <button
                 onClick={clearAllFilters}
-                className="text-xs text-rose-600 hover:underline uppercase tracking-wider"
+                className="text-xs text-rose-600 hover:underline uppercase tracking-wider font-medium"
               >
                 Reset All
               </button>
             </div>
           )}
 
-          {/* Category List */}
+          {/* 1. Category Filter */}
           <div>
             <h3 className="text-xs font-bold uppercase tracking-widest text-noir-900 mb-3">
               Categories
@@ -210,13 +315,88 @@ function ShopContent() {
             </div>
           </div>
 
-          {/* Price Range Slider */}
-          <div className="pt-4 border-t border-neutral-200">
+          {/* 2. Size Filter */}
+          <div className="pt-5 border-t border-neutral-200">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-noir-900">
+                Size
+              </h3>
+              {selectedSize !== "all" && (
+                <button
+                  onClick={() => handleSizeChange("all")}
+                  className="text-[10px] text-neutral-400 hover:text-rose-600 uppercase tracking-wider"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {availableSizes.map((sz) => (
+                <button
+                  key={sz}
+                  onClick={() => handleSizeChange(sz)}
+                  className={`py-1.5 text-xs uppercase tracking-wider border rounded-sm font-medium transition-all ${
+                    selectedSize === sz
+                      ? "bg-noir-900 text-white border-noir-900 shadow-sm"
+                      : "bg-white text-noir-900 border-neutral-200 hover:border-noir-900"
+                  }`}
+                >
+                  {sz}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 3. Color Filter */}
+          <div className="pt-5 border-t border-neutral-200">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-noir-900">
+                Colour
+              </h3>
+              {selectedColor !== "all" && (
+                <button
+                  onClick={() => handleColorChange("all")}
+                  className="text-[10px] text-neutral-400 hover:text-rose-600 uppercase tracking-wider"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2.5">
+              {FILTER_COLORS.map((col) => (
+                <button
+                  key={col.name}
+                  onClick={() => handleColorChange(col.name)}
+                  className={`relative w-6 h-6 rounded-full border transition-all flex items-center justify-center ${
+                    selectedColor.toLowerCase() === col.name.toLowerCase()
+                      ? "ring-2 ring-noir-900 ring-offset-2 scale-110"
+                      : "border-neutral-300 hover:scale-105"
+                  }`}
+                  style={{ backgroundColor: col.hex }}
+                  title={col.name}
+                  aria-label={`Filter by ${col.name}`}
+                >
+                  {selectedColor.toLowerCase() === col.name.toLowerCase() && (
+                    <Check
+                      className={`w-3 h-3 ${
+                        col.name === "White" || col.name === "Cream"
+                          ? "text-black"
+                          : "text-white"
+                      }`}
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 4. Price Range Slider */}
+          <div className="pt-5 border-t border-neutral-200">
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-xs font-bold uppercase tracking-widest text-noir-900">
                 Max Price
               </h3>
-              <span className="text-xs font-semibold text-noir-900">
+              <span className="text-xs font-bold text-noir-900">
                 ₹{priceMax.toLocaleString()}
               </span>
             </div>
@@ -235,29 +415,44 @@ function ShopContent() {
             </div>
           </div>
 
-          {/* Sustainability & Quality Note */}
+          {/* 5. In-Stock Availability Toggle */}
+          <div className="pt-5 border-t border-neutral-200">
+            <label className="flex items-center space-x-2 text-xs text-noir-900 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={inStockOnly}
+                onChange={(e) => setInStockOnly(e.target.checked)}
+                className="accent-noir-900 w-4 h-4 rounded"
+              />
+              <span className="uppercase tracking-wider font-semibold text-[11px]">
+                In-Stock Only
+              </span>
+            </label>
+          </div>
+
+          {/* Guarantee Pill */}
           <div className="p-4 bg-brand-50 border border-brand-200 rounded-sm">
             <div className="flex items-center space-x-2 text-brand-800 text-xs font-semibold uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Velour Craft Guarantee</span>
             </div>
             <p className="text-[11px] text-brand-900 mt-1.5 leading-relaxed">
-              Every piece includes complimentary garment bags and comes with our 14-day fit guarantee.
+              Every garment includes luxury garment dustbags and comes with our 14-day doorstep exchange privilege.
             </p>
           </div>
         </aside>
 
-        {/* Product Grid Area */}
+        {/* Product Grid & Top Bar Area */}
         <div className="lg:col-span-3 space-y-6">
-          {/* Top Bar: Mobile Filter Trigger + Sort dropdown */}
-          <div className="flex items-center justify-between pb-4 border-b border-neutral-200">
+          {/* Top Bar: Mobile Filter Button + Active Chips + Sort */}
+          <div className="flex flex-wrap items-center justify-between pb-4 border-b border-neutral-200 gap-3">
             {/* Mobile Filter Button */}
             <button
               onClick={() => setIsFilterOpenMobile(true)}
               className="lg:hidden flex items-center space-x-2 text-xs uppercase tracking-wider font-semibold text-noir-900 px-3 py-2 border border-neutral-300 rounded-sm"
             >
               <SlidersHorizontal className="w-4 h-4" />
-              <span>Filters</span>
+              <span>Filters {hasActiveFilters && "(Active)"}</span>
             </button>
 
             {/* Product Counter */}
@@ -288,15 +483,78 @@ function ShopContent() {
             </div>
           </div>
 
+          {/* Active Filter Chips */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-2 pb-2">
+              <span className="text-[11px] uppercase tracking-wider text-neutral-400">
+                Filtered by:
+              </span>
+              {selectedGender !== "all" && (
+                <span className="inline-flex items-center px-2.5 py-1 bg-neutral-100 text-noir-900 text-xs rounded-sm uppercase tracking-wider">
+                  Gender: {selectedGender}
+                  <button onClick={() => handleGenderChange("all")} className="ml-1 text-neutral-500 hover:text-black">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {selectedCategory !== "all" && (
+                <span className="inline-flex items-center px-2.5 py-1 bg-neutral-100 text-noir-900 text-xs rounded-sm uppercase tracking-wider">
+                  Category: {selectedCategory.replace("-", " ")}
+                  <button onClick={() => handleCategoryChange("all")} className="ml-1 text-neutral-500 hover:text-black">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {selectedSize !== "all" && (
+                <span className="inline-flex items-center px-2.5 py-1 bg-neutral-100 text-noir-900 text-xs rounded-sm uppercase tracking-wider">
+                  Size: {selectedSize}
+                  <button onClick={() => handleSizeChange("all")} className="ml-1 text-neutral-500 hover:text-black">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {selectedColor !== "all" && (
+                <span className="inline-flex items-center px-2.5 py-1 bg-neutral-100 text-noir-900 text-xs rounded-sm uppercase tracking-wider">
+                  Colour: {selectedColor}
+                  <button onClick={() => handleColorChange("all")} className="ml-1 text-neutral-500 hover:text-black">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {priceMax < 15000 && (
+                <span className="inline-flex items-center px-2.5 py-1 bg-neutral-100 text-noir-900 text-xs rounded-sm uppercase tracking-wider">
+                  Under ₹{priceMax.toLocaleString()}
+                  <button onClick={() => setPriceMax(15000)} className="ml-1 text-neutral-500 hover:text-black">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {inStockOnly && (
+                <span className="inline-flex items-center px-2.5 py-1 bg-neutral-100 text-noir-900 text-xs rounded-sm uppercase tracking-wider">
+                  In-Stock Only
+                  <button onClick={() => setInStockOnly(false)} className="ml-1 text-neutral-500 hover:text-black">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              <button
+                onClick={clearAllFilters}
+                className="text-xs text-rose-600 hover:underline uppercase tracking-wider font-semibold ml-2"
+              >
+                Clear All
+              </button>
+            </div>
+          )}
+
           {/* Product Grid */}
           <ProductGrid
             products={filteredProducts}
-            emptyMessage="No pieces match your selected combination of categories, gender, and price range. Try broadening your filter selection."
+            emptyMessage="No pieces match your selected combination of audience, category, size, colour, and price range. Try broadening your filter selection."
           />
         </div>
       </div>
 
-      {/* Mobile Filters Drawer */}
+      {/* Mobile Filters Slide-out Drawer */}
       {isFilterOpenMobile && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
@@ -316,17 +574,37 @@ function ShopContent() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto py-6 space-y-6">
+            <div className="flex-1 overflow-y-auto py-5 space-y-6">
+              {/* Audience */}
               <div>
-                <h4 className="text-xs uppercase tracking-widest font-semibold text-neutral-700 mb-3">
+                <h4 className="text-xs uppercase tracking-widest font-semibold text-neutral-700 mb-2.5">
+                  Audience & Department
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {GENDERS.map((g) => (
+                    <button
+                      key={g.value}
+                      onClick={() => handleGenderChange(g.value)}
+                      className={`py-1.5 px-2 text-xs uppercase tracking-wider border rounded-sm ${
+                        selectedGender === g.value
+                          ? "bg-noir-900 text-white font-bold border-noir-900"
+                          : "border-neutral-200 text-neutral-600"
+                      }`}
+                    >
+                      {g.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Categories */}
+              <div className="pt-4 border-t border-neutral-200">
+                <h4 className="text-xs uppercase tracking-widest font-semibold text-neutral-700 mb-2.5">
                   Categories
                 </h4>
                 <div className="space-y-2">
                   <button
-                    onClick={() => {
-                      handleCategoryChange("all");
-                      setIsFilterOpenMobile(false);
-                    }}
+                    onClick={() => handleCategoryChange("all")}
                     className={`block text-xs uppercase tracking-wider text-left w-full ${
                       selectedCategory === "all" ? "font-bold text-noir-900" : "text-neutral-500"
                     }`}
@@ -336,10 +614,7 @@ function ShopContent() {
                   {INITIAL_CATEGORIES.map((c) => (
                     <button
                       key={c.slug}
-                      onClick={() => {
-                        handleCategoryChange(c.slug);
-                        setIsFilterOpenMobile(false);
-                      }}
+                      onClick={() => handleCategoryChange(c.slug)}
                       className={`block text-xs uppercase tracking-wider text-left w-full ${
                         selectedCategory === c.slug
                           ? "font-bold text-noir-900"
@@ -352,6 +627,54 @@ function ShopContent() {
                 </div>
               </div>
 
+              {/* Sizes */}
+              <div className="pt-4 border-t border-neutral-200">
+                <h4 className="text-xs uppercase tracking-widest font-semibold text-neutral-700 mb-2.5">
+                  Sizes ({selectedGender})
+                </h4>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {availableSizes.map((sz) => (
+                    <button
+                      key={sz}
+                      onClick={() => handleSizeChange(sz)}
+                      className={`py-1.5 text-xs uppercase tracking-wider border rounded-sm font-medium ${
+                        selectedSize === sz
+                          ? "bg-noir-900 text-white border-noir-900"
+                          : "border-neutral-200 text-noir-900"
+                      }`}
+                    >
+                      {sz}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Colours */}
+              <div className="pt-4 border-t border-neutral-200">
+                <h4 className="text-xs uppercase tracking-widest font-semibold text-neutral-700 mb-2.5">
+                  Colours
+                </h4>
+                <div className="flex flex-wrap gap-2.5">
+                  {FILTER_COLORS.map((col) => (
+                    <button
+                      key={col.name}
+                      onClick={() => handleColorChange(col.name)}
+                      className={`w-6 h-6 rounded-full border flex items-center justify-center ${
+                        selectedColor.toLowerCase() === col.name.toLowerCase()
+                          ? "ring-2 ring-noir-900 ring-offset-2 scale-110"
+                          : "border-neutral-300"
+                      }`}
+                      style={{ backgroundColor: col.hex }}
+                    >
+                      {selectedColor.toLowerCase() === col.name.toLowerCase() && (
+                        <Check className="w-3 h-3 text-white" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Max */}
               <div className="pt-4 border-t border-neutral-200">
                 <div className="flex justify-between items-center mb-2">
                   <h4 className="text-xs font-semibold uppercase tracking-widest text-neutral-700">
@@ -370,6 +693,21 @@ function ShopContent() {
                   onChange={(e) => setPriceMax(Number(e.target.value))}
                   className="w-full accent-noir-900"
                 />
+              </div>
+
+              {/* In-stock */}
+              <div className="pt-4 border-t border-neutral-200">
+                <label className="flex items-center space-x-2 text-xs text-noir-900">
+                  <input
+                    type="checkbox"
+                    checked={inStockOnly}
+                    onChange={(e) => setInStockOnly(e.target.checked)}
+                    className="accent-noir-900 w-4 h-4 rounded"
+                  />
+                  <span className="uppercase tracking-wider font-semibold">
+                    In-Stock Only
+                  </span>
+                </label>
               </div>
             </div>
 

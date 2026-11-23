@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { X, User, Heart, ShoppingBag, Shield, LogOut, Package } from "lucide-react";
+import { X, User, Heart, ShoppingBag, Shield, LogOut, Package, Sparkles } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { APP_CONFIG } from "@/lib/constants";
 
@@ -34,32 +34,110 @@ export default function MobileNav({ isOpen, onClose, links, session }) {
         </div>
 
         {/* Links */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
-          <div className="space-y-4">
-            <h4 className="text-[11px] uppercase tracking-widest text-neutral-400 font-semibold">
-              Explore Wardrobe
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+          {/* Departments */}
+          <div className="space-y-3">
+            <h4 className="text-[10px] uppercase tracking-widest text-brand-600 font-bold">
+              Shop By Audience
             </h4>
-            <div className="space-y-3">
-              {links.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  onClick={onClose}
-                  className="block text-sm uppercase tracking-wider text-noir-900 hover:text-brand-600 font-medium"
-                >
-                  {link.label}
-                </Link>
-              ))}
+            <div className="grid grid-cols-2 gap-2">
+              <Link
+                href="/shop?gender=Women"
+                onClick={onClose}
+                className="p-3 bg-neutral-50 hover:bg-brand-50 border border-neutral-200 rounded text-center text-xs uppercase tracking-wider font-semibold text-noir-900"
+              >
+                Women
+              </Link>
+              <Link
+                href="/shop?gender=Men"
+                onClick={onClose}
+                className="p-3 bg-neutral-50 hover:bg-brand-50 border border-neutral-200 rounded text-center text-xs uppercase tracking-wider font-semibold text-noir-900"
+              >
+                Men
+              </Link>
+              <Link
+                href="/shop?gender=Kids"
+                onClick={onClose}
+                className="p-3 bg-neutral-50 hover:bg-brand-50 border border-neutral-200 rounded text-center text-xs uppercase tracking-wider font-semibold text-noir-900"
+              >
+                Kids
+              </Link>
+              <Link
+                href="/shop?gender=Unisex"
+                onClick={onClose}
+                className="p-3 bg-neutral-50 hover:bg-brand-50 border border-neutral-200 rounded text-center text-xs uppercase tracking-wider font-semibold text-noir-900"
+              >
+                Unisex
+              </Link>
             </div>
           </div>
 
+          {/* Catalog Categories */}
+          <div className="space-y-3 pt-2">
+            <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">
+              Explore Collections
+            </h4>
+            <div className="space-y-2.5">
+              <Link
+                href="/shop?sort=newest"
+                onClick={onClose}
+                className="block text-xs uppercase tracking-wider text-noir-900 font-medium hover:text-brand-600"
+              >
+                New Arrivals
+              </Link>
+              <Link
+                href="/shop?sort=trending"
+                onClick={onClose}
+                className="block text-xs uppercase tracking-wider text-noir-900 font-medium hover:text-brand-600"
+              >
+                Trending Essentials
+              </Link>
+              <Link
+                href="/shop"
+                onClick={onClose}
+                className="block text-xs uppercase tracking-wider text-noir-900 font-medium hover:text-brand-600"
+              >
+                All Garments
+              </Link>
+              <Link
+                href="/shop?category=outerwear-coats"
+                onClick={onClose}
+                className="block text-xs uppercase tracking-wider text-neutral-600 hover:text-noir-900"
+              >
+                Outerwear & Coats
+              </Link>
+              <Link
+                href="/shop?category=hoodies-sweats"
+                onClick={onClose}
+                className="block text-xs uppercase tracking-wider text-neutral-600 hover:text-noir-900"
+              >
+                Hoodies & Sweats
+              </Link>
+              <Link
+                href="/shop?category=tailored-trousers"
+                onClick={onClose}
+                className="block text-xs uppercase tracking-wider text-neutral-600 hover:text-noir-900"
+              >
+                Tailored Trousers
+              </Link>
+              <Link
+                href="/shop?category=knitwear-sweaters"
+                onClick={onClose}
+                className="block text-xs uppercase tracking-wider text-neutral-600 hover:text-noir-900"
+              >
+                Knitwear
+              </Link>
+            </div>
+          </div>
+
+          {/* Account & Saved */}
           <div className="border-t border-neutral-100 pt-5 space-y-3">
-            <h4 className="text-[11px] uppercase tracking-widest text-neutral-400 font-semibold">
+            <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">
               Account & Saved
             </h4>
             {session?.user ? (
               <div className="space-y-3">
-                <div className="pb-2">
+                <div className="pb-1">
                   <p className="text-xs font-semibold text-noir-900">{session.user.name}</p>
                   <p className="text-[11px] text-neutral-400">{session.user.email}</p>
                 </div>
@@ -129,4 +207,3 @@ export default function MobileNav({ isOpen, onClose, links, session }) {
     </div>
   );
 }
-

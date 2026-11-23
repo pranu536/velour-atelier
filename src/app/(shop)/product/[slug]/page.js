@@ -55,9 +55,13 @@ export default function ProductDetailPage({ params }) {
   const isFavorited = isInWishlist(productId);
   const discount = calculateDiscount(product.price, product.compareAtPrice);
 
-  // Recommendations: Other products from same category or gender
+  // Recommendations: Other products from same gender first, then category
   const relatedProducts = INITIAL_PRODUCTS.filter(
-    (p) => p.slug !== product.slug && (p.categorySlug === product.categorySlug || p.gender === product.gender)
+    (p) =>
+      p.slug !== product.slug &&
+      (p.gender === product.gender ||
+        (product.gender !== "Kids" && p.gender === "Unisex") ||
+        p.categorySlug === product.categorySlug)
   ).slice(0, 4);
 
   const handleColorSelect = (color) => {
@@ -80,23 +84,30 @@ export default function ProductDetailPage({ params }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumb */}
-      <nav className="flex items-center space-x-2 text-xs uppercase tracking-widest text-neutral-400 mb-8">
-        <Link href="/" className="hover:text-noir-900 transition-colors">
+      <nav className="flex items-center space-x-2 text-xs uppercase tracking-widest text-neutral-400 mb-8 overflow-x-auto scrollbar-none py-1">
+        <Link href="/" className="hover:text-noir-900 transition-colors shrink-0">
           Home
         </Link>
         <span>/</span>
-        <Link href="/shop" className="hover:text-noir-900 transition-colors">
+        <Link href="/shop" className="hover:text-noir-900 transition-colors shrink-0">
           Shop
         </Link>
         <span>/</span>
         <Link
+          href={`/shop?gender=${product.gender}`}
+          className="hover:text-noir-900 transition-colors shrink-0 font-medium text-brand-700"
+        >
+          {product.gender}
+        </Link>
+        <span>/</span>
+        <Link
           href={`/shop?category=${product.categorySlug}`}
-          className="hover:text-noir-900 transition-colors"
+          className="hover:text-noir-900 transition-colors shrink-0"
         >
           {product.category?.name || product.categorySlug.replace("-", " ")}
         </Link>
         <span>/</span>
-        <span className="text-noir-900 font-semibold truncate max-w-xs">{product.name}</span>
+        <span className="text-noir-900 font-semibold truncate max-w-xs shrink-0">{product.name}</span>
       </nav>
 
       {/* Product Main Section */}

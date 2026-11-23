@@ -278,11 +278,10 @@ export default function CheckoutPage() {
             <div className="space-y-3">
               {/* Razorpay Online */}
               <label
-                className={`flex items-start p-4 border rounded-sm cursor-pointer transition-all ${
-                  paymentMethod === "RAZORPAY"
+                className={`flex items-start p-4 border rounded-sm cursor-pointer transition-all ${paymentMethod === "RAZORPAY"
                     ? "border-noir-900 bg-neutral-50/70"
                     : "border-neutral-200 hover:border-neutral-300"
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
@@ -309,11 +308,10 @@ export default function CheckoutPage() {
 
               {/* Cash on Delivery option */}
               <label
-                className={`flex items-start p-4 border rounded-sm cursor-pointer transition-all ${
-                  paymentMethod === "COD"
+                className={`flex items-start p-4 border rounded-sm cursor-pointer transition-all ${paymentMethod === "COD"
                     ? "border-noir-900 bg-neutral-50/70"
                     : "border-neutral-200 hover:border-neutral-300"
-                }`}
+                  }`}
               >
                 <input
                   type="radio"

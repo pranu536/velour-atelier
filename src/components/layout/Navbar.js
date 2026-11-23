@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import {
   ShoppingBag,
@@ -14,6 +14,7 @@ import {
   LogOut,
   Package,
   Shield,
+  Sparkles,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -23,7 +24,6 @@ import MobileNav from "./MobileNav";
 import Modal from "@/components/common/Modal";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
-import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -37,13 +37,14 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  const navLinks = [
-    { label: "New In", href: "/shop?sort=newest" },
-    { label: "Collections", href: "/shop" },
+  // Four-department navigation + collections
+  const departmentLinks = [
     { label: "Women", href: "/shop?gender=Women" },
     { label: "Men", href: "/shop?gender=Men" },
-    { label: "Outerwear", href: "/shop?category=outerwear-coats" },
-    { label: "Knitwear", href: "/shop?category=knitwear-sweaters" },
+    { label: "Kids", href: "/shop?gender=Kids" },
+    { label: "Unisex", href: "/shop?gender=Unisex" },
+    { label: "New In", href: "/shop?sort=newest" },
+    { label: "Collections", href: "/shop" },
   ];
 
   const handleSearchSubmit = (e) => {
@@ -80,15 +81,15 @@ export default function Navbar() {
             </div>
 
             {/* Desktop Navigation Links (Left) */}
-            <nav className="hidden lg:flex items-center space-x-8">
-              {navLinks.map((link) => {
+            <nav className="hidden lg:flex items-center space-x-7">
+              {departmentLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
                   <Link
                     key={link.label}
                     href={link.href}
                     className={`text-xs font-medium uppercase tracking-widest transition-colors hover:text-brand-600 ${
-                      isActive ? "text-noir-900 font-semibold" : "text-neutral-600"
+                      isActive ? "text-noir-900 font-bold" : "text-neutral-600"
                     }`}
                   >
                     {link.label}
@@ -247,7 +248,7 @@ export default function Navbar() {
       <MobileNav
         isOpen={isMobileNavOpen}
         onClose={() => setIsMobileNavOpen(false)}
-        links={navLinks}
+        links={departmentLinks}
         session={session}
       />
 
@@ -260,14 +261,14 @@ export default function Navbar() {
       >
         <form onSubmit={handleSearchSubmit} className="space-y-4">
           <Input
-            placeholder="Search tailored overcoats, boxy hoodies, silk shirts..."
+            placeholder="Search Men, Women, Kids & Unisex garments..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             autoFocus
           />
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
             <span className="text-[11px] text-neutral-400 uppercase tracking-wider">
-              Popular: Overcoat, Pleated, Cashmere, Heavyweight
+              Popular: Overcoat, Boxy Hoodie, Junior Trench, Silk Shirt, Pleated Trousers
             </span>
             <Button type="submit" variant="primary" size="sm">
               Search
