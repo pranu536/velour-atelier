@@ -44,28 +44,29 @@ export default function HomePage() {
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
+              href="/shop"
               variant="gold"
               size="lg"
-              className="w-full sm:w-auto shadow-xl"
+              className="w-full sm:w-auto shadow-xl flex items-center justify-center"
             >
-              <Link href="/shop" className="flex items-center justify-center">
-                <span>Shop The Collection</span>
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
+              <span>Shop The Collection</span>
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
+              href="/shop?gender=Women"
               variant="outline"
               size="lg"
               className="w-full sm:w-auto text-white border-white hover:bg-white hover:text-noir-900"
             >
-              <Link href="/shop?gender=Women">View Women</Link>
+              View Women
             </Button>
             <Button
+              href="/shop?gender=Men"
               variant="outline"
               size="lg"
               className="w-full sm:w-auto text-white border-white hover:bg-white hover:text-noir-900"
             >
-              <Link href="/shop?gender=Men">View Men</Link>
+              View Men
             </Button>
           </div>
         </div>
@@ -175,8 +176,8 @@ export default function HomePage() {
               </div>
             </div>
             <div className="pt-2">
-              <Button variant="gold" size="md">
-                <Link href="/shop">Explore Lookbook</Link>
+              <Button href="/shop" variant="gold" size="md">
+                Explore Lookbook
               </Button>
             </div>
           </div>

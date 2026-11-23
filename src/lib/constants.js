@@ -13,8 +13,8 @@ export const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export const GENDERS = [
   { label: "All Collections", value: "all" },
-  { label: "Men", value: "Men" },
   { label: "Women", value: "Women" },
+  { label: "Men", value: "Men" },
   { label: "Unisex", value: "Unisex" },
 ];
 

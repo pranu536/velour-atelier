@@ -129,3 +129,4 @@ export default function MobileNav({ isOpen, onClose, links, session }) {
     </div>
   );
 }
+

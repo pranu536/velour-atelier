@@ -157,3 +157,4 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - **Server-Side Price Integrity**: All totals are verified server-side against catalog rates before charging.
 - **HMAC Verification**: Razorpay payment signatures are validated with cryptographic hash matches.
 - **Password Protection**: Passwords are saved only as salted bcrypt hashes.
+

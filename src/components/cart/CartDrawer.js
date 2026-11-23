@@ -104,12 +104,13 @@ export default function CartDrawer() {
                   </p>
                 </div>
                 <Button
+                  href="/shop"
                   onClick={() => setIsOpen(false)}
                   variant="primary"
                   size="md"
                   className="mt-2"
                 >
-                  <Link href="/shop">Start Shopping</Link>
+                  Start Shopping
                 </Button>
               </div>
             ) : (
@@ -219,23 +220,23 @@ export default function CartDrawer() {
               </p>
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <Button
+                  href="/cart"
                   onClick={() => setIsOpen(false)}
                   variant="outline"
                   size="md"
-                  className="w-full"
+                  className="w-full text-center"
                 >
-                  <Link href="/cart">View Bag</Link>
+                  View Bag
                 </Button>
                 <Button
+                  href="/checkout"
                   onClick={() => setIsOpen(false)}
                   variant="primary"
                   size="md"
-                  className="w-full"
+                  className="w-full flex items-center justify-center"
                 >
-                  <Link href="/checkout" className="flex items-center justify-center">
-                    <span>Checkout</span>
-                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                  </Link>
+                  <span>Checkout</span>
+                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Button>
               </div>
             </div>

@@ -22,3 +22,4 @@ export default function ProductGrid({ products = [], emptyMessage = "No garments
     </div>
   );
 }
+

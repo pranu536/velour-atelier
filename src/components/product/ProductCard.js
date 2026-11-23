@@ -12,7 +12,8 @@ export default function ProductCard({ product }) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
 
-  const isFavorited = isInWishlist(product.id);
+  const productId = product.id || product.slug;
+  const isFavorited = isInWishlist(productId);
   const discount = calculateDiscount(product.price, product.compareAtPrice);
 
   const primaryImage = product.images?.[0] || "";
@@ -21,7 +22,6 @@ export default function ProductCard({ product }) {
   const handleQuickAdd = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // Quick add default size and color
     const defaultSize = product.sizes?.[0] || "M";
     const defaultColor = product.colors?.[0] || { name: "Default" };
     addToCart(product, { size: defaultSize, color: defaultColor, quantity: 1 });
@@ -29,35 +29,37 @@ export default function ProductCard({ product }) {
 
   return (
     <div className="group relative flex flex-col bg-white">
-      {/* Image Container with Hover Flip */}
-      <Link
-        href={`/product/${product.slug}`}
-        className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100 block"
-      >
-        {/* Primary Image */}
-        {primaryImage && (
-          <Image
-            src={primaryImage}
-            alt={product.name}
-            fill
-            className="object-cover object-top transition-opacity duration-500 group-hover:opacity-0"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
-        )}
+      {/* Visual Image Container with Hover Flip */}
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100 block">
+        {/* Full Image Link */}
+        <Link
+          href={`/product/${product.slug}`}
+          className="absolute inset-0 z-0 block"
+          aria-label={`View ${product.name}`}
+        >
+          {primaryImage && (
+            <Image
+              src={primaryImage}
+              alt={product.name}
+              fill
+              className="object-cover object-top transition-opacity duration-500 group-hover:opacity-0"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          )}
 
-        {/* Secondary Image for smooth hover effect */}
-        {secondaryImage && (
-          <Image
-            src={secondaryImage}
-            alt={`${product.name} alternate view`}
-            fill
-            className="object-cover object-top transition-transform duration-700 ease-out opacity-0 group-hover:opacity-100 group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
-        )}
+          {secondaryImage && (
+            <Image
+              src={secondaryImage}
+              alt={`${product.name} alternate view`}
+              fill
+              className="object-cover object-top transition-transform duration-700 ease-out opacity-0 group-hover:opacity-100 group-hover:scale-105"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          )}
+        </Link>
 
-        {/* Badges */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col space-y-1 z-10">
+        {/* Badges Overlay */}
+        <div className="absolute top-2.5 left-2.5 flex flex-col space-y-1 z-10 pointer-events-none">
           {product.isNewArrival && (
             <Badge variant="new" size="sm">
               New Drop
@@ -75,7 +77,7 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        {/* Wishlist Button */}
+        {/* Wishlist Button - Sibling to Link, preventing invalid DOM nesting */}
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -92,7 +94,7 @@ export default function ProductCard({ product }) {
           <Heart className={`w-4 h-4 ${isFavorited ? "fill-rose-600" : ""}`} />
         </button>
 
-        {/* Quick Add To Bag Bar (Slides up on desktop hover) */}
+        {/* Quick Add To Bag Bar - Sibling to Link */}
         {product.inStock && (
           <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 via-black/20 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden sm:flex justify-center z-10">
             <button
@@ -104,14 +106,14 @@ export default function ProductCard({ product }) {
             </button>
           </div>
         )}
-      </Link>
+      </div>
 
       {/* Product Information */}
       <div className="pt-3 pb-2 flex flex-col flex-1">
         {/* Category & Gender */}
         <div className="flex items-center justify-between text-[11px] text-neutral-400 uppercase tracking-widest">
           <span>{product.gender}</span>
-          {product.category?.name && <span>{product.category.name}</span>}
+          <span>{product.category?.name || "Apparel"}</span>
         </div>
 
         {/* Title */}

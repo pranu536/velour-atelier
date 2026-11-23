@@ -40,10 +40,10 @@ export default function Navbar() {
   const navLinks = [
     { label: "New In", href: "/shop?sort=newest" },
     { label: "Collections", href: "/shop" },
-    { label: "Men", href: "/shop?gender=Men" },
     { label: "Women", href: "/shop?gender=Women" },
+    { label: "Men", href: "/shop?gender=Men" },
     { label: "Outerwear", href: "/shop?category=outerwear-coats" },
-    { label: "Hoodies", href: "/shop?category=hoodies-sweats" },
+    { label: "Knitwear", href: "/shop?category=knitwear-sweaters" },
   ];
 
   const handleSearchSubmit = (e) => {

@@ -64,11 +64,9 @@ export default function CartPage() {
           Explore our autumn/winter tailoring, heavyweight loopback hoodies, and minimalist essentials.
         </p>
         <div className="pt-4">
-          <Button variant="primary" size="lg">
-            <Link href="/shop" className="flex items-center space-x-2">
-              <span>Explore The Collection</span>
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
+          <Button href="/shop" variant="primary" size="lg" className="inline-flex items-center space-x-2">
+            <span>Explore The Collection</span>
+            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
       </div>
@@ -291,11 +289,9 @@ export default function CartPage() {
 
             {/* Checkout Action Button */}
             <div className="pt-2">
-              <Button variant="primary" size="lg" className="w-full">
-                <Link href="/checkout" className="flex items-center justify-center">
-                  <span>Proceed to Checkout</span>
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
+              <Button href="/checkout" variant="primary" size="lg" className="w-full flex items-center justify-center">
+                <span>Proceed to Checkout</span>
+                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
 

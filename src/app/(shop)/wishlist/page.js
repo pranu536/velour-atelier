@@ -7,7 +7,6 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
 import Button from "@/components/common/Button";
-import Badge from "@/components/common/Badge";
 
 export default function WishlistPage() {
   const { wishlistItems, removeFromWishlist } = useWishlist();
@@ -35,11 +34,9 @@ export default function WishlistPage() {
           Save your favourite architectural cuts, tailored coats, and luxury silhouettes for future styling.
         </p>
         <div className="pt-4">
-          <Button variant="primary" size="lg">
-            <Link href="/shop" className="flex items-center space-x-2">
-              <span>Explore Wardrobe</span>
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
+          <Button href="/shop" variant="primary" size="lg" className="inline-flex items-center space-x-2">
+            <span>Explore Wardrobe</span>
+            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
       </div>
@@ -74,19 +71,21 @@ export default function WishlistPage() {
             className="group relative flex flex-col bg-white border border-neutral-100 rounded-sm overflow-hidden"
           >
             {/* Image */}
-            <Link
-              href={`/product/${product.slug}`}
-              className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100 block"
-            >
-              {product.image && (
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                />
-              )}
+            <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100 block">
+              <Link
+                href={`/product/${product.slug}`}
+                className="absolute inset-0 z-0 block"
+              >
+                {product.image && (
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  />
+                )}
+              </Link>
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -97,13 +96,13 @@ export default function WishlistPage() {
               >
                 <Trash2 className="w-4 h-4" />
               </button>
-            </Link>
+            </div>
 
             {/* Info */}
             <div className="p-3.5 flex flex-col flex-1 justify-between">
               <div>
                 <span className="text-[10px] text-neutral-400 uppercase tracking-widest">
-                  {product.category}
+                  {product.category || "Apparel"}
                 </span>
                 <Link
                   href={`/product/${product.slug}`}
@@ -122,7 +121,7 @@ export default function WishlistPage() {
                   onClick={() => handleMoveToBag(product)}
                   variant="primary"
                   size="sm"
-                  className="w-full"
+                  className="w-full flex items-center justify-center"
                 >
                   <ShoppingBag className="w-3.5 h-3.5 mr-1.5" />
                   <span>Move to Bag</span>

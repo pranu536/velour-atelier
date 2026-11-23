@@ -40,6 +40,7 @@ export const INITIAL_CATEGORIES = [
 
 export const INITIAL_PRODUCTS = [
   {
+    id: "prod-1",
     name: "Cashmere Double-Breasted Overcoat",
     slug: "cashmere-double-breasted-overcoat",
     description: "A masterclass in tailored luxury. Crafted from an ultra-soft cashmere and virgin wool blend with structured padded shoulders, horn button closures, and a full viscose satin lining.",
@@ -53,8 +54,12 @@ export const INITIAL_PRODUCTS = [
     price: 9499,
     compareAtPrice: 13999,
     categorySlug: "outerwear-coats",
-    gender: "Men",
-    sizes: ["S", "M", "L", "XL"],
+    category: {
+      name: "Outerwear & Coats",
+      slug: "outerwear-coats",
+    },
+    gender: "Women",
+    sizes: ["XS", "S", "M", "L", "XL"],
     colors: [
       { name: "Camel", hexCode: "#C19A6B", image: "https://images.unsplash.com/photo-1544923246-77307dd654cb?q=80&w=1000&auto=format&fit=crop" },
       { name: "Onyx Black", hexCode: "#111111", image: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?q=80&w=1000&auto=format&fit=crop" }
@@ -68,11 +73,12 @@ export const INITIAL_PRODUCTS = [
     stockCount: 35,
     isFeatured: true,
     isNewArrival: true,
-    tags: ["luxury", "coat", "winter", "formal", "outerwear"],
+    tags: ["luxury", "coat", "winter", "formal", "outerwear", "women"],
     rating: 4.9,
     reviewsCount: 38,
   },
   {
+    id: "prod-2",
     name: "Architectural Heavyweight Boxy Hoodie",
     slug: "architectural-heavyweight-boxy-hoodie",
     description: "Engineered from bespoke 520 GSM loopback cotton fleece. Featuring a double-layered hood without drawstrings for an uncompromising clean drape, drop shoulders, and dense ribbed cuffs.",
@@ -86,6 +92,10 @@ export const INITIAL_PRODUCTS = [
     price: 3499,
     compareAtPrice: 4499,
     categorySlug: "hoodies-sweats",
+    category: {
+      name: "Hoodies & Sweats",
+      slug: "hoodies-sweats",
+    },
     gender: "Unisex",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     colors: [
@@ -107,6 +117,7 @@ export const INITIAL_PRODUCTS = [
     reviewsCount: 72,
   },
   {
+    id: "prod-3",
     name: "Relaxed Drape Silk-Blend Resort Shirt",
     slug: "relaxed-drape-silk-blend-resort-shirt",
     description: "Designed with an open Cuban camp collar and fluid silk-tencel drape. Perfect for elevated leisure and refined layering over minimalist ribbed tank tops.",
@@ -120,8 +131,12 @@ export const INITIAL_PRODUCTS = [
     price: 2899,
     compareAtPrice: 3899,
     categorySlug: "shirts-tops",
-    gender: "Men",
-    sizes: ["S", "M", "L", "XL"],
+    category: {
+      name: "Shirts & Tops",
+      slug: "shirts-tops",
+    },
+    gender: "Women",
+    sizes: ["XS", "S", "M", "L", "XL"],
     colors: [
       { name: "Earthy Taupe", hexCode: "#968370", image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1000&auto=format&fit=crop" },
       { name: "Alabaster", hexCode: "#F0EFEA", image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?q=80&w=1000&auto=format&fit=crop" }
@@ -134,11 +149,12 @@ export const INITIAL_PRODUCTS = [
     stockCount: 45,
     isFeatured: false,
     isNewArrival: true,
-    tags: ["shirt", "resort", "silk", "summer", "relaxed"],
+    tags: ["shirt", "resort", "silk", "summer", "relaxed", "women"],
     rating: 4.7,
     reviewsCount: 29,
   },
   {
+    id: "prod-4",
     name: "Wide-Leg Pleated Wool Trousers",
     slug: "wide-leg-pleated-wool-trousers",
     description: "Tailored with a high-rise waist, deep double reverse pleats, and an expansive wide-leg cascade. Cut from high-twist tropical wool for year-round effortless movement.",
@@ -152,7 +168,11 @@ export const INITIAL_PRODUCTS = [
     price: 4299,
     compareAtPrice: 5999,
     categorySlug: "tailored-trousers",
-    gender: "Unisex",
+    category: {
+      name: "Tailored Trousers",
+      slug: "tailored-trousers",
+    },
+    gender: "Women",
     sizes: ["XS", "S", "M", "L", "XL"],
     colors: [
       { name: "Charcoal Heather", hexCode: "#3C3F42", image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1000&auto=format&fit=crop" },
@@ -166,11 +186,12 @@ export const INITIAL_PRODUCTS = [
     stockCount: 40,
     isFeatured: true,
     isNewArrival: false,
-    tags: ["pants", "tailored", "trousers", "pleated", "wool"],
+    tags: ["pants", "tailored", "trousers", "pleated", "wool", "women"],
     rating: 4.9,
     reviewsCount: 54,
   },
   {
+    id: "prod-5",
     name: "Sculptural Chunky Wool Cardigan",
     slug: "sculptural-chunky-wool-cardigan",
     description: "An expressive knit statement piece spun from 7-gauge British lambswool. Features oversized horn buttons, a deep V-neckline, and ribbed tactile edging.",
@@ -184,6 +205,10 @@ export const INITIAL_PRODUCTS = [
     price: 4899,
     compareAtPrice: 6500,
     categorySlug: "knitwear-sweaters",
+    category: {
+      name: "Knitwear & Sweaters",
+      slug: "knitwear-sweaters",
+    },
     gender: "Women",
     sizes: ["XS", "S", "M", "L"],
     colors: [
@@ -198,11 +223,12 @@ export const INITIAL_PRODUCTS = [
     stockCount: 28,
     isFeatured: true,
     isNewArrival: true,
-    tags: ["knitwear", "cardigan", "wool", "winter", "cozy"],
+    tags: ["knitwear", "cardigan", "wool", "winter", "cozy", "women"],
     rating: 4.9,
     reviewsCount: 41,
   },
   {
+    id: "prod-6",
     name: "Minimalist Full-Grain Leather Weekender Bag",
     slug: "minimalist-full-grain-leather-weekender-bag",
     description: "Handcrafted from supple Italian vegetable-tanned leather. Features brass hardware with brushed gunmetal finish, removable padded shoulder strap, and internal laptop compartment.",
@@ -216,6 +242,10 @@ export const INITIAL_PRODUCTS = [
     price: 8999,
     compareAtPrice: 11999,
     categorySlug: "accessories-bags",
+    category: {
+      name: "Accessories & Bags",
+      slug: "accessories-bags",
+    },
     gender: "Unisex",
     sizes: ["One Size"],
     colors: [
@@ -235,6 +265,7 @@ export const INITIAL_PRODUCTS = [
     reviewsCount: 19,
   },
   {
+    id: "prod-7",
     name: "Water-Repellent Technical Trench Coat",
     slug: "water-repellent-technical-trench-coat",
     description: "A futuristic reinterpretation of the heritage trench. Engineered with high-density bonded gabardine, storm flap, magnetic collar closure, and an adjustable waist belt.",
@@ -248,6 +279,10 @@ export const INITIAL_PRODUCTS = [
     price: 7999,
     compareAtPrice: 10499,
     categorySlug: "outerwear-coats",
+    category: {
+      name: "Outerwear & Coats",
+      slug: "outerwear-coats",
+    },
     gender: "Women",
     sizes: ["XS", "S", "M", "L"],
     colors: [
@@ -262,11 +297,12 @@ export const INITIAL_PRODUCTS = [
     stockCount: 22,
     isFeatured: true,
     isNewArrival: false,
-    tags: ["trench", "coat", "outerwear", "waterproof", "minimalist"],
+    tags: ["trench", "coat", "outerwear", "waterproof", "minimalist", "women"],
     rating: 4.8,
     reviewsCount: 33,
   },
   {
+    id: "prod-8",
     name: "Structured Mock-Neck Minimalist Tee",
     slug: "structured-mock-neck-minimalist-tee",
     description: "Cut from ultra-dense 300 GSM combed cotton jersey with a snug mock-neck rib and drop shoulder structure. Maintains a pristine clean silhouette through countless wears.",
@@ -280,7 +316,11 @@ export const INITIAL_PRODUCTS = [
     price: 1899,
     compareAtPrice: 2499,
     categorySlug: "shirts-tops",
-    gender: "Unisex",
+    category: {
+      name: "Shirts & Tops",
+      slug: "shirts-tops",
+    },
+    gender: "Women",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     colors: [
       { name: "Optic White", hexCode: "#FFFFFF", image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1000&auto=format&fit=crop" },
@@ -296,7 +336,7 @@ export const INITIAL_PRODUCTS = [
     stockCount: 120,
     isFeatured: false,
     isNewArrival: true,
-    tags: ["t-shirt", "mock-neck", "basics", "essential", "cotton"],
+    tags: ["t-shirt", "mock-neck", "basics", "essential", "cotton", "women"],
     rating: 4.8,
     reviewsCount: 65,
   }

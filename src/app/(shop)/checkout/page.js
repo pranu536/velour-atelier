@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
@@ -53,8 +54,8 @@ export default function CheckoutPage() {
           Please add clothing pieces to your shopping bag before proceeding to checkout.
         </p>
         <div className="pt-4">
-          <Button variant="primary" size="lg">
-            <Link href="/shop">Explore Wardrobe</Link>
+          <Button href="/shop" variant="primary" size="lg">
+            Explore Wardrobe
           </Button>
         </div>
       </div>
@@ -177,8 +178,8 @@ export default function CheckoutPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Load Razorpay script dynamically */}
-      <script src="https://checkout.razorpay.com/v1/checkout.js" async />
+      {/* Load Razorpay script using Next.js Script component */}
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
       {/* Header */}
       <div className="pb-8 border-b border-neutral-200">

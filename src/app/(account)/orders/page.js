@@ -133,12 +133,10 @@ export default function OrdersPage() {
             Real-time fulfillment tracking and invoice records for your garments.
           </p>
         </div>
-        <Link href="/shop" className="mt-4 sm:mt-0">
-          <Button variant="outline" size="sm">
-            <span>Explore New Drops</span>
-            <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-          </Button>
-        </Link>
+        <Button href="/shop" variant="outline" size="sm" className="mt-4 sm:mt-0">
+          <span>Explore New Drops</span>
+          <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+        </Button>
       </div>
 
       {/* Orders List */}
@@ -288,3 +286,4 @@ export default function OrdersPage() {
     </div>
   );
 }
+

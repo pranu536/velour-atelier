@@ -108,7 +108,20 @@ function ShopContent() {
           {searchQuery && (
             <>
               <span>/</span>
-              <span className="text-brand-600 font-medium">Search: &quot;{searchQuery}&quot;</span>
+              <span className="text-brand-600 font-medium inline-flex items-center">
+                Search: &quot;{searchQuery}&quot;
+                <button
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.delete("search");
+                    router.push(`/shop?${params.toString()}`);
+                  }}
+                  className="ml-1.5 p-0.5 text-neutral-400 hover:text-noir-900 transition-colors"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </span>
             </>
           )}
         </div>

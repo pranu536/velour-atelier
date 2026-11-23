@@ -77,18 +77,14 @@ export default function AdminOverviewPage() {
           </h1>
         </div>
         <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-          <Link href="/admin/products">
-            <Button variant="primary" size="sm">
-              <Package className="w-3.5 h-3.5 mr-1.5" />
-              <span>Manage Products</span>
-            </Button>
-          </Link>
-          <Link href="/admin/orders">
-            <Button variant="outline" size="sm">
-              <ShoppingBag className="w-3.5 h-3.5 mr-1.5" />
-              <span>Review Orders</span>
-            </Button>
-          </Link>
+          <Button href="/admin/products" variant="primary" size="sm">
+            <Package className="w-3.5 h-3.5 mr-1.5" />
+            <span>Manage Products</span>
+          </Button>
+          <Button href="/admin/orders" variant="outline" size="sm">
+            <ShoppingBag className="w-3.5 h-3.5 mr-1.5" />
+            <span>Review Orders</span>
+          </Button>
         </div>
       </div>
 
@@ -224,3 +220,4 @@ export default function AdminOverviewPage() {
     </div>
   );
 }
+

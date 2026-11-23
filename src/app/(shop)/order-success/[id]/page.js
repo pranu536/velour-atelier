@@ -47,17 +47,13 @@ export default function OrderSuccessPage({ params }) {
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-        <Button variant="primary" size="lg">
-          <Link href="/orders" className="flex items-center space-x-2">
-            <Package className="w-4 h-4 mr-2" />
-            <span>Track Order Status</span>
-          </Link>
+        <Button href="/orders" variant="primary" size="lg" className="flex items-center space-x-2">
+          <Package className="w-4 h-4 mr-2" />
+          <span>Track Order Status</span>
         </Button>
-        <Button variant="outline" size="lg">
-          <Link href="/shop" className="flex items-center space-x-2">
-            <span>Continue Shopping</span>
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Link>
+        <Button href="/shop" variant="outline" size="lg" className="flex items-center space-x-2">
+          <span>Continue Shopping</span>
+          <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
 
@@ -74,3 +70,4 @@ export default function OrderSuccessPage({ params }) {
     </div>
   );
 }
+

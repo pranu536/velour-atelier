@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
@@ -12,10 +13,11 @@ export default function Button({
   disabled = false,
   type = "button",
   onClick,
+  href,
   ...props
 }) {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium tracking-wide transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed uppercase text-xs";
+    "inline-flex items-center justify-center font-medium tracking-wide transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed uppercase text-xs cursor-pointer select-none";
 
   const variants = {
     primary:
@@ -39,12 +41,23 @@ export default function Button({
     icon: "p-2 rounded-sm",
   };
 
+  const combinedClasses = cn(baseStyles, variants[variant], sizes[size], className);
+
+  // If href is supplied, render Next.js Link directly to prevent invalid DOM nesting
+  if (href) {
+    return (
+      <Link href={href} className={combinedClasses} onClick={onClick} {...props}>
+        {children}
+      </Link>
+    );
+  }
+
   return (
     <button
       type={type}
       disabled={disabled || isLoading}
       onClick={onClick}
-      className={cn(baseStyles, variants[variant], sizes[size], className)}
+      className={combinedClasses}
       {...props}
     >
       {isLoading ? (

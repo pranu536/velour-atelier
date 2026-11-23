@@ -5,13 +5,35 @@ import { INITIAL_PRODUCTS, INITIAL_CATEGORIES } from "@/lib/seed-data";
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
+    const slug = searchParams.get("slug");
     const category = searchParams.get("category");
     const gender = searchParams.get("gender");
     const search = searchParams.get("search");
     const sort = searchParams.get("sort") || "newest";
     const featured = searchParams.get("featured");
 
-    // In local dev without live MongoDB cluster connection, fallback gracefully to seed catalog
+    // Single product lookup by slug
+    if (slug) {
+      try {
+        const product = await prisma.product.findUnique({
+          where: { slug },
+          include: { category: true },
+        });
+        if (product) {
+          return NextResponse.json({ success: true, product });
+        }
+      } catch (dbErr) {
+        console.warn("DB lookup notice:", dbErr.message);
+      }
+
+      const fallback = INITIAL_PRODUCTS.find((p) => p.slug === slug);
+      if (fallback) {
+        return NextResponse.json({ success: true, product: fallback });
+      }
+      return NextResponse.json({ success: false, error: "Garment not found" }, { status: 404 });
+    }
+
+    // Multiple products query
     let products = [];
     try {
       const where = {};
@@ -43,18 +65,9 @@ export async function GET(request) {
         orderBy,
       });
     } catch (dbError) {
-      console.warn("MongoDB connection not active, utilizing curated fallback catalog:", dbError.message);
-      // Transform INITIAL_PRODUCTS with category info
-      products = INITIAL_PRODUCTS.map((p, idx) => ({
-        id: `mock-prod-${idx + 1}`,
-        ...p,
-        category: INITIAL_CATEGORIES.find((c) => c.slug === p.categorySlug) || {
-          name: "Apparel",
-          slug: p.categorySlug,
-        },
-      }));
+      // Graceful fallback to rich curated catalog
+      products = [...INITIAL_PRODUCTS];
 
-      // Apply in-memory filtering for seamless standalone operation
       if (category) {
         products = products.filter((p) => p.categorySlug === category);
       }

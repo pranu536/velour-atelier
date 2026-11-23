@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -41,7 +41,18 @@ export default function ProductDetailPage({ params }) {
   const [quantity, setQuantity] = useState(1);
   const [isAddedFeedback, setIsAddedFeedback] = useState(false);
 
-  const isFavorited = isInWishlist(product.id);
+  // Reset variant selections when navigating between products
+  useEffect(() => {
+    if (product) {
+      setSelectedImage(product.images?.[0] || "");
+      setSelectedSize(product.sizes?.[0] || "M");
+      setSelectedColor(product.colors?.[0] || null);
+      setQuantity(1);
+    }
+  }, [slug]);
+
+  const productId = product.id || product.slug;
+  const isFavorited = isInWishlist(productId);
   const discount = calculateDiscount(product.price, product.compareAtPrice);
 
   // Recommendations: Other products from same category or gender
@@ -82,7 +93,7 @@ export default function ProductDetailPage({ params }) {
           href={`/shop?category=${product.categorySlug}`}
           className="hover:text-noir-900 transition-colors"
         >
-          {product.categorySlug.replace("-", " ")}
+          {product.category?.name || product.categorySlug.replace("-", " ")}
         </Link>
         <span>/</span>
         <span className="text-noir-900 font-semibold truncate max-w-xs">{product.name}</span>
@@ -178,7 +189,7 @@ export default function ProductDetailPage({ params }) {
                 </>
               )}
             </div>
-            <p className="text-[11px] text-neutral-400">Taxes included. Complimentary shipping on this order.</p>
+            <p className="text-[11px] text-neutral-400">Taxes included. Complimentary courier shipping on this order.</p>
 
             {/* Description */}
             <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed pt-2">
@@ -229,9 +240,9 @@ export default function ProductDetailPage({ params }) {
                   <span className="text-xs uppercase tracking-widest font-semibold text-noir-900">
                     Select Size
                   </span>
-                  <button className="text-[11px] uppercase tracking-wider text-neutral-500 hover:text-noir-900 underline">
-                    Size Guide
-                  </button>
+                  <span className="text-[11px] uppercase tracking-wider text-neutral-400">
+                    Standard Atelier Fit
+                  </span>
                 </div>
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                   {product.sizes.map((size) => (
@@ -259,6 +270,7 @@ export default function ProductDetailPage({ params }) {
                   <button
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 text-xs font-semibold"
+                    aria-label="Decrease quantity"
                   >
                     -
                   </button>
@@ -266,6 +278,7 @@ export default function ProductDetailPage({ params }) {
                   <button
                     onClick={() => setQuantity((q) => q + 1)}
                     className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 text-xs font-semibold"
+                    aria-label="Increase quantity"
                   >
                     +
                   </button>

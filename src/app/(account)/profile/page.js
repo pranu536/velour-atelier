@@ -71,8 +71,8 @@ export default function ProfilePage() {
         <p className="text-xs text-neutral-500">
           Please sign in to view your profile and manage saved delivery addresses.
         </p>
-        <Button variant="primary" size="md">
-          <Link href="/login?callbackUrl=/profile">Sign In Now</Link>
+        <Button href="/login?callbackUrl=/profile" variant="primary" size="md">
+          Sign In Now
         </Button>
       </div>
     );
@@ -124,12 +124,10 @@ export default function ProfilePage() {
           </h1>
         </div>
         <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-          <Link href="/orders">
-            <Button variant="outline" size="sm">
-              <Package className="w-3.5 h-3.5 mr-1.5" />
-              <span>Order History</span>
-            </Button>
-          </Link>
+          <Button href="/orders" variant="outline" size="sm">
+            <Package className="w-3.5 h-3.5 mr-1.5" />
+            <span>Order History</span>
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -175,11 +173,9 @@ export default function ProfilePage() {
 
           {session.user.role === "ADMIN" && (
             <div className="pt-4 border-t border-neutral-100">
-              <Link href="/admin">
-                <Button variant="gold" size="md" className="w-full">
-                  <span>Enter Admin Dashboard</span>
-                </Button>
-              </Link>
+              <Button href="/admin" variant="gold" size="md" className="w-full">
+                <span>Enter Admin Dashboard</span>
+              </Button>
             </div>
           )}
         </div>
@@ -352,3 +348,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+
