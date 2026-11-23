@@ -43,14 +43,17 @@ model User {
 }
 
 type Address {
-  fullName   String
-  phone      String
-  street     String
-  city       String
-  state      String
-  postalCode String
-  country    String  @default("India")
-  isDefault  Boolean @default(false)
+  id          String?
+  fullName    String
+  phone       String
+  houseNumber String?
+  street      String
+  landmark    String?
+  city        String
+  state       String
+  postalCode  String
+  country     String  @default("India")
+  isDefault   Boolean @default(false)
 }
 
 model Category {
@@ -113,6 +116,7 @@ model Order {
   discount          Float         @default(0)
   totalAmount       Float
   notes             String?
+  idempotencyKey    String?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 }

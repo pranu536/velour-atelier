@@ -12,6 +12,8 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/profile";
+  const registered = searchParams.get("registered");
+  const urlError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,6 +65,21 @@ function LoginForm() {
           Access your orders, saved measurements, shipping addresses, and private drops.
         </p>
       </div>
+
+      {/* URL Parameter Notices */}
+      {registered === "true" && (
+        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-sm">
+          <p className="font-semibold">Account created successfully!</p>
+          <p className="text-[11px] mt-0.5 text-emerald-700">Please sign in with your credentials to access your client portal.</p>
+        </div>
+      )}
+
+      {urlError === "AccessDenied" && (
+        <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-sm">
+          <p className="font-semibold">Administrator Clearance Required</p>
+          <p className="text-[11px] mt-0.5 text-rose-700">The page you attempted to visit is restricted strictly to verified administrator accounts.</p>
+        </div>
+      )}
 
       {/* Quick Demo Login Bar for Seamless Testing */}
       <div className="p-3 bg-brand-50 border border-brand-200 rounded-sm text-xs space-y-2">

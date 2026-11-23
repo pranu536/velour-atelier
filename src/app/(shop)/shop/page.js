@@ -9,8 +9,9 @@ import {
   Loader2,
   Check,
   CheckCircle2,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
-import { INITIAL_CATEGORIES, INITIAL_PRODUCTS } from "@/lib/seed-data";
 import {
   GENDERS,
   ADULT_SIZES,
@@ -25,6 +26,12 @@ import Button from "@/components/common/Button";
 function ShopContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Live database state
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
 
   // URL state
   const activeCategory = searchParams.get("category") || "all";
@@ -43,6 +50,40 @@ function ShopContent() {
   const [priceMax, setPriceMax] = useState(15000);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [isFilterOpenMobile, setIsFilterOpenMobile] = useState(false);
+
+  // Fetch live products and categories from Next.js MongoDB API
+  const fetchCatalogData = async () => {
+    setIsLoading(true);
+    setFetchError(null);
+    try {
+      const [prodRes, catRes] = await Promise.all([
+        fetch("/api/products?limit=100"),
+        fetch("/api/categories"),
+      ]);
+
+      if (!prodRes.ok) {
+        throw new Error("Unable to retrieve garments from database.");
+      }
+      if (!catRes.ok) {
+        throw new Error("Unable to retrieve categories from database.");
+      }
+
+      const prodData = await prodRes.json();
+      const catData = await catRes.json();
+
+      setProducts(prodData.products || []);
+      setCategories(catData.categories || []);
+    } catch (err) {
+      console.error("Shop live data fetch error:", err);
+      setFetchError(err.message || "Failed to connect to database");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCatalogData();
+  }, []);
 
   // Sync state when URL search params change
   useEffect(() => {
@@ -124,7 +165,7 @@ function ShopContent() {
 
   // Multi-attribute Filtered & Sorted Product List
   const filteredProducts = useMemo(() => {
-    return INITIAL_PRODUCTS.filter((product) => {
+    return products.filter((product) => {
       // 1. Gender / Audience filter
       if (selectedGender !== "all") {
         if (selectedGender === "Kids" && product.gender !== "Kids") return false;
@@ -134,7 +175,8 @@ function ShopContent() {
       }
 
       // 2. Category filter
-      if (selectedCategory !== "all" && product.categorySlug !== selectedCategory) {
+      const catSlug = product.category?.slug || product.categorySlug;
+      if (selectedCategory !== "all" && catSlug !== selectedCategory) {
         return false;
       }
 
@@ -299,9 +341,9 @@ function ShopContent() {
               >
                 All Garments
               </button>
-              {INITIAL_CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <button
-                  key={cat.slug}
+                  key={cat.id || cat.slug}
                   onClick={() => handleCategoryChange(cat.slug)}
                   className={`block text-xs uppercase tracking-wider text-left transition-colors w-full ${
                     selectedCategory === cat.slug
@@ -546,11 +588,40 @@ function ShopContent() {
             </div>
           )}
 
-          {/* Product Grid */}
-          <ProductGrid
-            products={filteredProducts}
-            emptyMessage="No pieces match your selected combination of audience, category, size, colour, and price range. Try broadening your filter selection."
-          />
+          {/* Product Grid Area with Loading, Error, and Empty States */}
+          {isLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 py-4">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="animate-pulse space-y-3 bg-white p-3 border border-[#EBE6DD]">
+                  <div className="aspect-[3/4] bg-[#F1EDE5] w-full" />
+                  <div className="h-3 bg-[#EBE6DD] w-3/4 rounded-sm" />
+                  <div className="h-3 bg-[#EBE6DD] w-1/3 rounded-sm" />
+                </div>
+              ))}
+            </div>
+          ) : fetchError ? (
+            <div className="text-center py-16 bg-[#F8F6F1] border border-[#EBE6DD] p-8 space-y-3 my-4">
+              <AlertCircle className="w-8 h-8 text-rose-600 mx-auto" />
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-noir-900">
+                Connection to Atelier Catalog Interrupted
+              </h3>
+              <p className="text-xs text-neutral-500 max-w-sm mx-auto">{fetchError}</p>
+              <Button
+                variant="primary"
+                size="sm"
+                className="mt-2"
+                onClick={fetchCatalogData}
+              >
+                <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                <span>Retry Connection</span>
+              </Button>
+            </div>
+          ) : (
+            <ProductGrid
+              products={filteredProducts}
+              emptyMessage="No pieces match your selected combination of audience, category, size, colour, and price range. Try broadening your filter selection."
+            />
+          )}
         </div>
       </div>
 
@@ -611,9 +682,9 @@ function ShopContent() {
                   >
                     All Garments
                   </button>
-                  {INITIAL_CATEGORIES.map((c) => (
+                  {categories.map((c) => (
                     <button
-                      key={c.slug}
+                      key={c.id || c.slug}
                       onClick={() => handleCategoryChange(c.slug)}
                       className={`block text-xs uppercase tracking-wider text-left w-full ${
                         selectedCategory === c.slug

@@ -15,6 +15,7 @@ import {
   Package,
   Shield,
   Sparkles,
+  MapPin,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -125,27 +126,36 @@ export default function Navbar() {
                   <div className="relative">
                     <button
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      className="flex items-center p-2 text-[#242424] hover:text-[#666666] transition-colors"
+                      className="flex items-center space-x-1.5 p-1.5 sm:px-2.5 sm:py-1.5 text-[#242424] hover:text-[#666666] border border-transparent hover:border-[#EBE6DD] rounded-sm transition-all"
                       aria-label="User Account"
                     >
                       <User className="w-4 h-4" />
+                      <span className="hidden sm:inline text-[11px] font-medium uppercase tracking-wider text-[#242424]">
+                        {session.user.name?.split(" ")?.[0] || "Account"}
+                      </span>
                     </button>
 
                     {/* Dropdown Menu */}
                     {isUserMenuOpen && (
-                      <div
-                        className="absolute right-0 mt-2 w-56 bg-white border border-[#EBE6DD] shadow-xl py-2 z-50 text-xs tracking-wide animate-fade-in"
-                        onMouseLeave={() => setIsUserMenuOpen(false)}
-                      >
-                        <div className="px-4 py-2 border-b border-[#F1EDE5]">
-                          <p className="font-semibold text-[#242424] truncate">{session.user.name}</p>
-                          <p className="text-[10px] text-neutral-500 truncate">{session.user.email}</p>
-                          {session.user.role === "ADMIN" && (
-                            <span className="inline-block mt-1 px-1.5 py-0.5 bg-[#242424] text-white text-[9px] font-semibold uppercase tracking-wider">
-                              Admin
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        />
+                        <div
+                          className="absolute right-0 mt-2 w-56 bg-white border border-[#EBE6DD] shadow-xl py-2 z-50 text-xs tracking-wide animate-fade-in"
+                        >
+                          <div className="px-4 py-2 border-b border-[#F1EDE5]">
+                            <p className="font-semibold text-[#242424] truncate">{session.user.name}</p>
+                            <p className="text-[10px] text-neutral-500 truncate">{session.user.email}</p>
+                            <span className={`inline-block mt-1 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider rounded ${
+                              session.user.role === "ADMIN" 
+                                ? "bg-noir-900 text-white" 
+                                : "bg-neutral-100 text-neutral-700 border border-neutral-200"
+                            }`}>
+                              {session.user.role || "CUSTOMER"}
                             </span>
-                          )}
-                        </div>
+                          </div>
                         <Link
                           href="/profile"
                           className="flex items-center px-4 py-2 text-[#242424] hover:bg-[#F8F6F1] transition-colors"
@@ -153,6 +163,14 @@ export default function Navbar() {
                         >
                           <User className="w-3.5 h-3.5 mr-2 text-neutral-400" />
                           <span>My Profile</span>
+                        </Link>
+                        <Link
+                          href="/addresses"
+                          className="flex items-center px-4 py-2 text-[#242424] hover:bg-[#F8F6F1] transition-colors"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <MapPin className="w-3.5 h-3.5 mr-2 text-neutral-400" />
+                          <span>Delivery Addresses</span>
                         </Link>
                         <Link
                           href="/orders"
@@ -183,7 +201,8 @@ export default function Navbar() {
                           <span>Sign Out</span>
                         </button>
                       </div>
-                    )}
+                    </>
+                  )}
                   </div>
                 ) : (
                   <Link

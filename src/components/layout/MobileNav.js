@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { X, User, Heart, ShoppingBag, Shield, LogOut, Package, Sparkles } from "lucide-react";
+import { X, User, Heart, ShoppingBag, Shield, LogOut, Package, Sparkles, MapPin } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { APP_CONFIG } from "@/lib/constants";
 
@@ -198,7 +198,15 @@ export default function MobileNav({ isOpen, onClose, links, session }) {
                   className="flex items-center text-xs uppercase tracking-wider text-neutral-700 hover:text-noir-900"
                 >
                   <User className="w-4 h-4 mr-3 text-neutral-400" />
-                  My Profile & Addresses
+                  My Profile
+                </Link>
+                <Link
+                  href="/addresses"
+                  onClick={onClose}
+                  className="flex items-center text-xs uppercase tracking-wider text-neutral-700 hover:text-noir-900"
+                >
+                  <MapPin className="w-4 h-4 mr-3 text-neutral-400" />
+                  Delivery Addresses
                 </Link>
                 <Link
                   href="/orders"

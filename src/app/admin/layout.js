@@ -11,7 +11,8 @@ import {
   LogOut,
   ShieldAlert,
   Shield,
-  Layers,
+  Loader2,
+  UserCheck,
 } from "lucide-react";
 import { APP_CONFIG } from "@/lib/constants";
 import Button from "@/components/common/Button";
@@ -26,6 +27,62 @@ export default function AdminLayout({ children }) {
     { label: "Fulfillment Orders", href: "/admin/orders", icon: ShoppingBag },
   ];
 
+  // 1. Loading state during session handshake
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-neutral-900 flex flex-col items-center justify-center space-y-3 text-white">
+        <Loader2 className="w-7 h-7 animate-spin text-brand-400" />
+        <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium">
+          Verifying Atelier Clearance...
+        </span>
+      </div>
+    );
+  }
+
+  // 2. Defense-in-depth authorization guard:
+  // Strictly prevent non-ADMIN users or unauthenticated visitors from accessing administrative portal
+  if (status === "unauthenticated" || session?.user?.role !== "ADMIN") {
+    return (
+      <div className="min-h-screen bg-[#F8F6F1] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white border border-[#EBE6DD] p-8 sm:p-10 text-center space-y-5 shadow-sm rounded-sm">
+          <div className="w-12 h-12 mx-auto rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600">
+            <ShieldAlert className="w-6 h-6" />
+          </div>
+
+          <div className="space-y-2">
+            <span className="text-[11px] uppercase tracking-widest text-rose-600 font-semibold block">
+              Restricted Portal
+            </span>
+            <h1 className="font-serif text-2xl font-bold uppercase tracking-tight text-[#242424]">
+              Administrator Clearance Required
+            </h1>
+            <p className="text-xs text-neutral-500 leading-relaxed">
+              {session?.user
+                ? `Signed in as ${session.user.email} (Role: ${session.user.role}). This account does not possess administrative privileges.`
+                : "Authentication required. Please sign in with an administrator account to access atelier operations."}
+            </p>
+          </div>
+
+          <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+            <Button href="/" variant="outline" size="sm">
+              <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
+              <span>Return to Storefront</span>
+            </Button>
+            <Button
+              href="/login?callbackUrl=/admin"
+              variant="primary"
+              size="sm"
+            >
+              <Shield className="w-3.5 h-3.5 mr-1.5" />
+              <span>{session?.user ? "Switch Account" : "Admin Sign In"}</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Authorized Administrator View
   return (
     <div className="min-h-screen bg-neutral-100/70 flex flex-col lg:flex-row">
       {/* Sidebar Navigation */}
@@ -43,6 +100,20 @@ export default function AdminLayout({ children }) {
             </div>
             <p className="text-[10px] text-neutral-400 uppercase tracking-widest mt-1">
               Atelier Management Suite
+            </p>
+          </div>
+
+          {/* Active Administrator Identity Badge */}
+          <div className="p-3 bg-neutral-800/80 border border-neutral-700/60 rounded-sm space-y-1">
+            <div className="flex items-center space-x-2 text-[10px] text-brand-400 uppercase tracking-wider font-semibold">
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>Authenticated Admin</span>
+            </div>
+            <p className="text-xs font-semibold text-white truncate">
+              {session.user.name || "Administrator"}
+            </p>
+            <p className="text-[10px] text-neutral-400 truncate">
+              {session.user.email}
             </p>
           </div>
 
@@ -80,7 +151,7 @@ export default function AdminLayout({ children }) {
           </Link>
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="flex items-center text-xs uppercase tracking-wider text-rose-400 hover:text-rose-300 transition-colors"
+            className="flex items-center text-xs uppercase tracking-wider text-rose-400 hover:text-rose-300 transition-colors w-full text-left"
           >
             <LogOut className="w-3.5 h-3.5 mr-2" />
             <span>Sign Out</span>
@@ -93,4 +164,3 @@ export default function AdminLayout({ children }) {
     </div>
   );
 }
-

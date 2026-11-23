@@ -16,6 +16,7 @@ export default function ProductCard({ product }) {
   const [activeImage, setActiveImage] = useState(product.images?.[0] || "");
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || null);
   const [addedNotice, setAddedNotice] = useState(false);
+  const [showSizePicker, setShowSizePicker] = useState(false);
 
   const productId = product.id || product.slug;
   const isFavorited = isInWishlist(productId);
@@ -24,17 +25,43 @@ export default function ProductCard({ product }) {
   const primaryImage = activeImage || product.images?.[0] || "";
   const secondaryImage = product.images?.[1] || primaryImage;
 
-  const handleQuickAdd = (e) => {
+  const handleQuickAddClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const defaultSize = product.sizes?.[0] || "M";
-    addToCart(product, {
+
+    // If multiple sizes exist, prompt customer to select size
+    if (product.sizes && product.sizes.length > 1) {
+      setShowSizePicker((prev) => !prev);
+      return;
+    }
+
+    const defaultSize = product.sizes?.[0] || "Standard";
+    const targetColor = selectedColor || product.colors?.[0] || { name: "Standard" };
+    const res = addToCart(product, {
       size: defaultSize,
-      color: selectedColor || product.colors?.[0] || { name: "Standard" },
+      color: targetColor,
       quantity: 1,
     });
-    setAddedNotice(true);
-    setTimeout(() => setAddedNotice(false), 1600);
+    if (res?.success) {
+      setAddedNotice(true);
+      setTimeout(() => setAddedNotice(false), 1600);
+    }
+  };
+
+  const handleSelectSizeAndAdd = (e, size) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const targetColor = selectedColor || product.colors?.[0] || { name: "Standard" };
+    const res = addToCart(product, {
+      size,
+      color: targetColor,
+      quantity: 1,
+    });
+    if (res?.success) {
+      setAddedNotice(true);
+      setShowSizePicker(false);
+      setTimeout(() => setAddedNotice(false), 1600);
+    }
   };
 
   const handleColorHover = (color) => {
@@ -109,37 +136,61 @@ export default function ProductCard({ product }) {
           }}
           className={`absolute top-2.5 right-2.5 p-2 transition-all duration-200 z-10 ${
             isFavorited
-              ? "bg-[#242424] text-white"
-              : "bg-white/90 hover:bg-white text-[#242424] border border-[#E5DFD6] opacity-0 group-hover:opacity-100 focus:opacity-100"
+              ? "bg-[#242424] text-white shadow-sm"
+              : "bg-white/90 hover:bg-white text-[#242424] border border-[#E5DFD6] sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
           }`}
           aria-label={isFavorited ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart className={`w-3.5 h-3.5 ${isFavorited ? "fill-white text-white" : ""}`} />
         </button>
 
-        {/* Quick Add Bar */}
+        {/* Quick Add Bar / Size Selector */}
         {product.inStock && (
-          <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/40 via-black/10 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-center z-10">
-            <button
-              onClick={handleQuickAdd}
-              className={`w-full py-2.5 px-3 text-[11px] uppercase tracking-widest font-medium transition-all duration-200 shadow-sm flex items-center justify-center space-x-1.5 ${
-                addedNotice
-                  ? "bg-[#242424] text-white"
-                  : "bg-white hover:bg-[#242424] hover:text-white text-[#242424]"
-              }`}
-            >
-              {addedNotice ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Added to Bag</span>
-                </>
-              ) : (
-                <>
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Quick Add</span>
-                </>
-              )}
-            </button>
+          <div
+            className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/60 via-black/20 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex flex-col justify-end z-10"
+            onMouseLeave={() => setShowSizePicker(false)}
+          >
+            {showSizePicker && product.sizes && product.sizes.length > 1 ? (
+              <div className="bg-white/95 backdrop-blur-sm p-2 rounded-sm shadow-lg space-y-1.5 animate-fade-in border border-[#EBE6DD]">
+                <div className="flex justify-between items-center text-[10px] uppercase tracking-wider text-neutral-500 font-medium px-1">
+                  <span>Select Size:</span>
+                  <span className="text-[#242424] font-semibold">{selectedColor?.name || "Standard"}</span>
+                </div>
+                <div className="flex flex-wrap gap-1 justify-center">
+                  {product.sizes.map((sz) => (
+                    <button
+                      key={sz}
+                      onClick={(e) => handleSelectSizeAndAdd(e, sz)}
+                      className="px-2 py-1 text-[10px] font-semibold border border-neutral-300 rounded hover:border-[#242424] hover:bg-[#242424] hover:text-white transition-colors uppercase tracking-wider text-[#242424]"
+                      aria-label={`Select size ${sz}`}
+                    >
+                      {sz}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={handleQuickAddClick}
+                className={`w-full py-2.5 px-3 text-[11px] uppercase tracking-widest font-medium transition-all duration-200 shadow-sm flex items-center justify-center space-x-1.5 ${
+                  addedNotice
+                    ? "bg-[#242424] text-white"
+                    : "bg-white hover:bg-[#242424] hover:text-white text-[#242424]"
+                }`}
+              >
+                {addedNotice ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Added to Bag</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{product.sizes && product.sizes.length > 1 ? "Select Size" : "Quick Add"}</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
         )}
       </div>

@@ -1,16 +1,51 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Sparkles, Feather, Leaf, Clock } from "lucide-react";
-import { INITIAL_PRODUCTS } from "@/lib/seed-data";
+import { ArrowRight, ShieldCheck, Sparkles, Feather, Leaf } from "lucide-react";
+import prisma from "@/lib/prisma";
 import ProductCard from "@/components/product/ProductCard";
 import ProductCarousel from "@/components/home/ProductCarousel";
 import NewsletterSection from "@/components/home/NewsletterSection";
 import Button from "@/components/common/Button";
 
-export default function HomePage() {
-  // Curation slices
-  const featuredProducts = INITIAL_PRODUCTS.filter((p) => p.isFeatured || p.isBestseller).slice(0, 8);
-  const newArrivals = INITIAL_PRODUCTS.filter((p) => p.isNewArrival).slice(0, 8);
+export default async function HomePage() {
+  // Live MongoDB queries via Prisma ORM
+  let featuredProducts = [];
+  let newArrivals = [];
+  let newArrivalsCount = 0;
+
+  try {
+    const [featured, arrivals, count] = await Promise.all([
+      prisma.product.findMany({
+        where: { isFeatured: true },
+        include: { category: true },
+        take: 8,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.product.findMany({
+        where: { isNewArrival: true },
+        include: { category: true },
+        take: 8,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.product.count({
+        where: { isNewArrival: true },
+      }),
+    ]);
+
+    featuredProducts = featured.map((p) => ({
+      ...p,
+      isBestseller: p.tags?.includes("bestseller") || p.rating >= 4.9,
+    }));
+
+    newArrivals = arrivals.map((p) => ({
+      ...p,
+      isBestseller: p.tags?.includes("bestseller"),
+    }));
+
+    newArrivalsCount = count;
+  } catch (error) {
+    console.error("HomePage live data fetch error:", error);
+  }
 
   // Four separate visual collections
   const collections = [
@@ -206,7 +241,7 @@ export default function HomePage() {
             href="/shop?sort=newest"
             className="text-xs uppercase tracking-widest text-[#242424] hover:text-[#7F6650] transition-colors flex items-center space-x-1 mt-3 sm:mt-0"
           >
-            <span>View All ({INITIAL_PRODUCTS.filter((p) => p.isNewArrival).length})</span>
+            <span>View All ({newArrivalsCount})</span>
             <ArrowRight className="w-3.5 h-3.5 ml-1" />
           </Link>
         </div>

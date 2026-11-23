@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -24,20 +24,23 @@ export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Local addresses state (initialized with demo address)
-  const [addresses, setAddresses] = useState([
-    {
-      id: "addr-1",
-      fullName: "Aria Thorne",
-      phone: "+91 98765 43210",
-      street: "Flat 4B, Silver Oak Heights, Indiranagar",
-      city: "Bengaluru",
-      state: "Karnataka",
-      postalCode: "560038",
-      country: "India",
-      isDefault: true,
-    },
-  ]);
+  // Saved addresses state from MongoDB
+  const [addresses, setAddresses] = useState([]);
+  const [isAddressesLoading, setIsAddressesLoading] = useState(true);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch("/api/addresses")
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.addresses)) {
+            setAddresses(data.addresses);
+          }
+        })
+        .catch(console.error)
+        .finally(() => setIsAddressesLoading(false));
+    }
+  }, [session?.user?.id]);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newAddress, setNewAddress] = useState({
@@ -78,37 +81,59 @@ export default function ProfilePage() {
     );
   }
 
-  const handleSaveAddress = (e) => {
+  const handleSaveAddress = async (e) => {
     e.preventDefault();
-    const id = `addr-${Date.now()}`;
-    setAddresses((prev) => [
-      ...prev.map((a) => (newAddress.isDefault ? { ...a, isDefault: false } : a)),
-      { id, ...newAddress },
-    ]);
-    setIsAddModalOpen(false);
-    setNewAddress({
-      fullName: "",
-      phone: "",
-      street: "",
-      city: "",
-      state: "",
-      postalCode: "",
-      country: "India",
-      isDefault: false,
-    });
+    try {
+      const res = await fetch("/api/addresses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...newAddress,
+          houseNumber: newAddress.street.split(",")[0] || "1",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAddresses(data.addresses);
+        setIsAddModalOpen(false);
+        setNewAddress({
+          fullName: "",
+          phone: "",
+          street: "",
+          city: "",
+          state: "",
+          postalCode: "",
+          country: "India",
+          isDefault: false,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const deleteAddress = (id) => {
-    setAddresses((prev) => prev.filter((a) => a.id !== id));
+  const deleteAddress = async (id) => {
+    try {
+      const res = await fetch(`/api/addresses/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setAddresses(data.addresses);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const setDefaultAddress = (id) => {
-    setAddresses((prev) =>
-      prev.map((a) => ({
-        ...a,
-        isDefault: a.id === id,
-      }))
-    );
+  const setDefaultAddress = async (id) => {
+    try {
+      const res = await fetch(`/api/addresses/${id}/default`, { method: "PATCH" });
+      const data = await res.json();
+      if (data.success) {
+        setAddresses(data.addresses);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -193,14 +218,23 @@ export default function ProfilePage() {
                   Manage addresses for express courier checkout.
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsAddModalOpen(true)}
-              >
-                <Plus className="w-3.5 h-3.5 mr-1" />
-                <span>Add Address</span>
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Button
+                  href="/addresses"
+                  variant="outline"
+                  size="sm"
+                >
+                  <span>Manage All</span>
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setIsAddModalOpen(true)}
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" />
+                  <span>Add Address</span>
+                </Button>
+              </div>
             </div>
 
             {/* Address Cards */}

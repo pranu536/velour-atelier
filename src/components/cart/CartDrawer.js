@@ -18,7 +18,22 @@ export default function CartDrawer() {
     subtotal,
     freeShippingRemaining,
     freeShippingProgress,
+    validateCart,
+    validationState,
+    isValidating,
   } = useCart();
+
+  const handleProceedToCheckout = async (e) => {
+    e.preventDefault();
+    const res = await validateCart();
+    if (res && !res.valid) {
+      setIsOpen(false);
+      window.location.href = "/cart";
+      return;
+    }
+    setIsOpen(false);
+    window.location.href = "/checkout";
+  };
 
   // Close drawer on Escape
   useEffect(() => {
@@ -229,13 +244,13 @@ export default function CartDrawer() {
                   View Bag
                 </Button>
                 <Button
-                  href="/checkout"
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleProceedToCheckout}
                   variant="primary"
                   size="md"
+                  disabled={isValidating}
                   className="w-full flex items-center justify-center"
                 >
-                  <span>Checkout</span>
+                  <span>{isValidating ? "Verifying..." : "Checkout"}</span>
                   <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Button>
               </div>

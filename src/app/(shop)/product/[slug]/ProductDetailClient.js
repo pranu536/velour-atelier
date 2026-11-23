@@ -13,7 +13,6 @@ import {
   Check,
   Star,
 } from "lucide-react";
-import { INITIAL_PRODUCTS } from "@/lib/seed-data";
 import { formatPrice, calculateDiscount } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -23,22 +22,14 @@ import ProductGrid from "@/components/product/ProductGrid";
 
 export default function ProductDetailClient({
   product: initialProduct,
-  relatedProducts: initialRelated,
+  relatedProducts: initialRelated = [],
 }) {
   const routeParams = useParams();
   const rawSlug = routeParams?.slug || "";
   const decodedSlug = rawSlug ? decodeURIComponent(rawSlug) : "";
 
-  // Locate product from passed prop or catalog fallback
-  const product =
-    initialProduct ||
-    INITIAL_PRODUCTS.find(
-      (p) =>
-        p.slug === decodedSlug ||
-        p.id === decodedSlug ||
-        p.slug === rawSlug ||
-        p.id === rawSlug
-    );
+  // Product is passed directly from live MongoDB server-side query
+  const product = initialProduct;
 
   if (!product) {
     notFound();
@@ -49,18 +40,24 @@ export default function ProductDetailClient({
 
   // Component state
   const [selectedImage, setSelectedImage] = useState(product?.images?.[0] || "");
-  const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || "M");
-  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] || null);
+  const [selectedSize, setSelectedSize] = useState(
+    product?.sizes?.length === 1 ? product.sizes[0] : ""
+  );
+  const [selectedColor, setSelectedColor] = useState(
+    product?.colors?.length === 1 ? product.colors[0] : null
+  );
   const [quantity, setQuantity] = useState(1);
   const [isAddedFeedback, setIsAddedFeedback] = useState(false);
+  const [variantError, setVariantError] = useState("");
 
   // Reset variant selections when navigating between products
   useEffect(() => {
     if (product) {
       setSelectedImage(product.images?.[0] || "");
-      setSelectedSize(product.sizes?.[0] || "M");
-      setSelectedColor(product.colors?.[0] || null);
+      setSelectedSize(product.sizes?.length === 1 ? product.sizes[0] : "");
+      setSelectedColor(product.colors?.length === 1 ? product.colors[0] : null);
       setQuantity(1);
+      setVariantError("");
     }
   }, [product?.slug, product?.id]);
 
@@ -68,32 +65,43 @@ export default function ProductDetailClient({
   const isFavorited = isInWishlist(productId);
   const discount = calculateDiscount(product.price, product.compareAtPrice);
 
-  // Recommendations: Other products from same gender first, then unisex/category
-  const relatedProducts =
-    initialRelated ||
-    INITIAL_PRODUCTS.filter(
-      (p) =>
-        p.slug !== product.slug &&
-        (p.gender === product.gender ||
-          (product.gender !== "Kids" && p.gender === "Unisex") ||
-          p.categorySlug === product.categorySlug)
-    ).slice(0, 4);
+  // Recommendations from live MongoDB query
+  const relatedProducts = initialRelated || [];
 
   const handleColorSelect = (color) => {
     setSelectedColor(color);
+    setVariantError("");
     if (color.image) {
       setSelectedImage(color.image);
     }
   };
 
+  const handleSizeSelect = (size) => {
+    setSelectedSize(size);
+    setVariantError("");
+  };
+
   const handleAddToCart = () => {
-    addToCart(product, {
+    if (product.sizes?.length > 0 && !selectedSize) {
+      setVariantError("Please select an available size before adding this piece to your bag.");
+      return;
+    }
+    if (product.colors?.length > 0 && !selectedColor) {
+      setVariantError("Please select a colour option before adding to your bag.");
+      return;
+    }
+    setVariantError("");
+    const res = addToCart(product, {
       size: selectedSize,
       color: selectedColor,
       quantity,
     });
-    setIsAddedFeedback(true);
-    setTimeout(() => setIsAddedFeedback(false), 2000);
+    if (res?.success) {
+      setIsAddedFeedback(true);
+      setTimeout(() => setIsAddedFeedback(false), 2000);
+    } else if (res?.error) {
+      setVariantError(res.error);
+    }
   };
 
   return (
@@ -261,10 +269,19 @@ export default function ProductDetailClient({
 
             {/* Size Selection */}
             {product.sizes && product.sizes.length > 0 && (
-              <div className="pt-4 border-t border-neutral-100">
+              <div className={`pt-4 border-t border-neutral-100 ${
+                variantError && !selectedSize ? "p-3 bg-amber-50/50 rounded-sm border border-amber-200" : ""
+              }`}>
                 <div className="flex justify-between items-center mb-2.5">
                   <span className="text-xs uppercase tracking-widest font-semibold text-noir-900">
-                    Select Size
+                    Select Size:{" "}
+                    {selectedSize ? (
+                      <span className="font-normal text-neutral-600">{selectedSize}</span>
+                    ) : (
+                      <span className="text-amber-700 text-[11px] font-normal tracking-normal">
+                        (Please select)
+                      </span>
+                    )}
                   </span>
                   <span className="text-[11px] uppercase tracking-wider text-neutral-400">
                     Standard Atelier Fit
@@ -274,7 +291,7 @@ export default function ProductDetailClient({
                   {product.sizes.map((size) => (
                     <button
                       key={size}
-                      onClick={() => setSelectedSize(size)}
+                      onClick={() => handleSizeSelect(size)}
                       className={`py-2 text-xs uppercase tracking-wider font-medium border rounded-sm transition-all ${
                         selectedSize === size
                           ? "bg-noir-900 text-white border-noir-900 shadow-sm"
@@ -285,6 +302,14 @@ export default function ProductDetailClient({
                     </button>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Variant Error Notification */}
+            {variantError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-sm text-rose-800 text-xs font-medium tracking-wide flex items-center space-x-2 animate-fade-in">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-600 shrink-0" />
+                <span>{variantError}</span>
               </div>
             )}
 
@@ -393,3 +418,4 @@ export default function ProductDetailClient({
     </div>
   );
 }
+

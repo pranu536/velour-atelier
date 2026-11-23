@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Trash2,
   Plus,
@@ -12,13 +13,17 @@ import {
   ShieldCheck,
   Tag,
   ArrowLeft,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
+import Badge from "@/components/common/Badge";
 
 export default function CartPage() {
+  const router = useRouter();
   const {
     items,
     removeFromCart,
@@ -30,11 +35,22 @@ export default function CartPage() {
     total,
     freeShippingRemaining,
     freeShippingProgress,
+    validateCart,
+    validationState,
+    isValidating,
   } = useCart();
 
   const [promoCode, setPromoCode] = useState("");
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoMessage, setPromoMessage] = useState(null);
+  const [checkoutError, setCheckoutError] = useState("");
+
+  // Validate cart against live database on initial load
+  useEffect(() => {
+    if (items.length > 0) {
+      validateCart();
+    }
+  }, [items.length, validateCart]);
 
   const applyPromo = (e) => {
     e.preventDefault();
@@ -47,6 +63,19 @@ export default function CartPage() {
       setPromoDiscount(0);
       setPromoMessage({ type: "error", text: "Invalid or expired promotional voucher." });
     }
+  };
+
+  const handleProceedToCheckout = async (e) => {
+    e.preventDefault();
+    setCheckoutError("");
+    const res = await validateCart();
+    if (res && !res.valid) {
+      setCheckoutError(
+        "Some items in your cart are currently out of stock or have limited availability. Please review before proceeding."
+      );
+      return;
+    }
+    router.push("/checkout");
   };
 
   const finalTotal = Math.max(0, total - promoDiscount);
@@ -116,6 +145,28 @@ export default function CartPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mt-8">
         {/* Left: Cart Items Table/List */}
         <div className="lg:col-span-8 space-y-6">
+          {/* Validation Notice Banner if issues exist */}
+          {validationState.issues?.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 p-4 rounded-sm space-y-2 text-xs text-amber-900 animate-fade-in">
+              <div className="flex items-center space-x-2 font-semibold uppercase tracking-wider">
+                <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+                <span>Atelier Inventory & Price Notification</span>
+              </div>
+              <ul className="list-disc pl-5 space-y-1 text-neutral-700">
+                {validationState.issues.map((issue, idx) => (
+                  <li key={idx}>{issue.message}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {checkoutError && (
+            <div className="bg-rose-50 border border-rose-200 p-4 rounded-sm text-xs text-rose-800 flex items-center space-x-2 animate-fade-in">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{checkoutError}</span>
+            </div>
+          )}
+
           <div className="divide-y divide-neutral-200 border-t border-b border-neutral-200">
             {items.map((item, idx) => (
               <div
@@ -184,7 +235,8 @@ export default function CartPage() {
                           item.quantity + 1
                         )
                       }
-                      className="p-1.5 hover:bg-neutral-100 text-neutral-600"
+                      disabled={item.stockCount !== undefined && item.quantity >= item.stockCount}
+                      className="p-1.5 hover:bg-neutral-100 text-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Increase"
                     >
                       <Plus className="w-3.5 h-3.5" />
@@ -289,8 +341,14 @@ export default function CartPage() {
 
             {/* Checkout Action Button */}
             <div className="pt-2">
-              <Button href="/checkout" variant="primary" size="lg" className="w-full flex items-center justify-center">
-                <span>Proceed to Checkout</span>
+              <Button
+                onClick={handleProceedToCheckout}
+                variant="primary"
+                size="lg"
+                disabled={isValidating}
+                className="w-full flex items-center justify-center"
+              >
+                <span>{isValidating ? "Validating Cart..." : "Proceed to Checkout"}</span>
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
