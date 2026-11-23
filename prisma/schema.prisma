@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PROCESSING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(CUSTOMER)
+  phone        String?
+  image        String?
+  addresses    Address[]
+  orders       Order[]
+  wishlistIds  String[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+type Address {
+  fullName   String
+  phone      String
+  street     String
+  city       String
+  state      String
+  postalCode String
+  country    String  @default("India")
+  isDefault  Boolean @default(false)
+}
+
+model Category {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  image       String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+model Product {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  slug           String         @unique
+  description    String
+  details        String[]
+  price          Float
+  compareAtPrice Float?
+  category       Category       @relation(fields: [categoryId], references: [id])
+  categoryId     String         @db.ObjectId
+  gender         String         // "Men", "Women", "Unisex"
+  sizes          String[]       // ["XS", "S", "M", "L", "XL", "XXL"]
+  colors         ProductColor[]
+  images         String[]
+  inStock        Boolean        @default(true)
+  stockCount     Int            @default(50)
+  isFeatured     Boolean        @default(false)
+  isNewArrival   Boolean        @default(true)
+  tags           String[]
+  rating         Float          @default(4.9)
+  reviewsCount   Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+type ProductColor {
+  name    String
+  hexCode String
+  image   String?
+}
+
+model Order {
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  orderNumber       String        @unique
+  user              User          @relation(fields: [userId], references: [id])
+  userId            String        @db.ObjectId
+  items             OrderItem[]
+  shippingAddress   Address
+  paymentMethod     String        @default("RAZORPAY")
+  paymentStatus     PaymentStatus @default(PENDING)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+  orderStatus       OrderStatus   @default(PROCESSING)
+  subtotal          Float
+  shippingFee       Float         @default(0)
+  tax               Float         @default(0)
+  discount          Float         @default(0)
+  totalAmount       Float
+  notes             String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+type OrderItem {
+  productId String
+  name      String
+  image     String
+  size      String
+  color     String
+  price     Float
+  quantity  Int
+  total     Float
+}
